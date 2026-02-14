@@ -12,6 +12,8 @@ import MealTracker from "./pages/MealTracker";
 import MealSuggestion from "./pages/MealSuggestion";
 import ProtectedRoute from "./components/ProtectedRoute";
 
+// 🔥 Import ChefAI Chatbot
+import ChefAIChatbot from "./components/ChefAIChatbot";
 
 function App() {
   return (
@@ -28,6 +30,7 @@ function App() {
 
           <Route path="/preferences" element={<PreferenceSetup />} />
           <Route path="/suggestions" element={<MealSuggestion />} />
+
           <Route
             path="/dashboard"
             element={
@@ -36,7 +39,9 @@ function App() {
               </ProtectedRoute>
             }
           />
+
           <Route path="/discover" element={<DiscoverMeals />} />
+
           <Route
             path="/tracker"
             element={
@@ -45,12 +50,15 @@ function App() {
               </ProtectedRoute>
             }
           />
-         
+
           <Route path="/taste" element={<Taste />} />
 
         </Route>
 
       </Routes>
+
+      {/* 🔥 Global Chatbot — appears on all pages */}
+      <ChefAIChatbot />
 
     </BrowserRouter>
   );
