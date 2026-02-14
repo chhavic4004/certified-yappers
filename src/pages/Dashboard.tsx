@@ -1,17 +1,33 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { signOut } from "firebase/auth";
+import { auth } from "@/lib/firebase";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+
+  const resolvedName =
+    user?.displayName || user?.email?.split("@")[0] || "User";
+  const resolvedEmail = user?.email || "";
 
   const [profile, setProfile] = useState({
-    name: "Alex Johnson",
+    name: resolvedName,
     age: 24,
-    email: "alex@email.com",
+    email: resolvedEmail,
     activity: "Moderately Active", // NOT editable
   });
 
   const [editing, setEditing] = useState(false);
+
+  useEffect(() => {
+    setProfile((prev) => ({
+      ...prev,
+      name: resolvedName,
+      email: resolvedEmail,
+    }));
+  }, [resolvedName, resolvedEmail]);
 
   const handleChange = (e: any) => {
     setProfile({
@@ -39,12 +55,20 @@ const Dashboard = () => {
       <div className="bg-white rounded-3xl border p-8 flex gap-8 items-center">
 
         {/* Avatar */}
-        <div className="w-28 h-28 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 text-white flex items-center justify-center text-3xl font-bold shadow-lg">
-          {profile.name.charAt(0)}
-        </div>
+        {user?.photoURL ? (
+          <img
+            src={user.photoURL}
+            alt={profile.name}
+            className="w-28 h-28 rounded-full object-cover shadow-lg"
+          />
+        ) : (
+          <div className="w-28 h-28 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 text-white flex items-center justify-center text-3xl font-bold shadow-lg">
+            {profile.name.charAt(0)}
+          </div>
+        )}
 
         {/* Info */}
-        <div className="flex-1 grid md:grid-cols-4 gap-6">
+        <div className="flex-1 min-w-0 grid md:grid-cols-4 gap-6">
 
           <ProfileField
             label="Full Name"
@@ -71,7 +95,7 @@ const Dashboard = () => {
           />
 
           {/* NOT EDITABLE */}
-          <div>
+          <div className="min-w-0">
             <p className="text-gray-400 mb-1">Activity Intelligence</p>
             <p className="font-semibold text-lg">
               {profile.activity}
@@ -165,7 +189,10 @@ const Dashboard = () => {
       {/* LOGOUT */}
       <div className="flex justify-end">
         <button
-          onClick={() => navigate("/")}
+          onClick={async () => {
+            await signOut(auth);
+            navigate("/");
+          }}
 
           className="
             bg-red-500
@@ -193,7 +220,7 @@ export default Dashboard;
 /* ---------- Components ---------- */
 
 const ProfileField = ({ label, name, value, editing, onChange }: any) => (
-  <div>
+  <div className="min-w-0">
     <p className="text-gray-400 mb-1">{label}</p>
 
     {editing ? (
@@ -204,7 +231,7 @@ const ProfileField = ({ label, name, value, editing, onChange }: any) => (
         className="border rounded-lg px-3 py-2 w-full"
       />
     ) : (
-      <p className="font-semibold text-lg">{value}</p>
+      <p className="font-semibold text-lg break-words">{value}</p>
     )}
   </div>
 );

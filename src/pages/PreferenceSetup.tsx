@@ -45,6 +45,8 @@ const cuisine = [
 const PreferenceSetup = () => {
   const navigate = useNavigate();
 
+  const storageKey = "flavourai.preferences";
+
   const [selected, setSelected] = useState({
     health: [] as string[],
     diet: [] as string[],
@@ -86,6 +88,16 @@ const PreferenceSetup = () => {
 
   const progress =
     (sections.filter(Boolean).length / sections.length) * 100;
+
+  const handleGenerate = () => {
+    const payload = {
+      ...selected,
+      updatedAt: new Date().toISOString(),
+    };
+
+    localStorage.setItem(storageKey, JSON.stringify(payload));
+    navigate("/suggestions");
+  };
 
   /* ---------- PREMIUM TOGGLE CARD ---------- */
 
@@ -249,7 +261,7 @@ const PreferenceSetup = () => {
         {/* CTA */}
         <button
           disabled={progress < 80}
-          onClick={() => navigate("/suggestions")}
+          onClick={handleGenerate}
           className="
             mt-12
             w-full

@@ -7,6 +7,7 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
+import { useAuth } from "@/contexts/AuthContext";
 
 const tasteData = [
   { month: "Jan", score: 62 },
@@ -26,6 +27,10 @@ const flavorTraits = [
 ];
 
 const Taste = () => {
+  const { user } = useAuth();
+  const displayName =
+    user?.displayName || user?.email?.split("@")[0] || "you";
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-white flex justify-center px-6 py-10">
 
@@ -39,7 +44,7 @@ const Taste = () => {
           </h1>
 
           <p className="text-gray-500">
-            See how your taste profile evolved as AI learned your preferences.
+            See how your taste profile evolved as AI learned {displayName}'s preferences.
           </p>
         </div>
 

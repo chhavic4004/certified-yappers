@@ -1,15 +1,55 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import {
+  createUserWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  updateProfile,
+} from "firebase/auth";
 import bgImage from "../assets/foodlog.webp";
 import logo from "../assets/favicon.png";
+import { auth } from "@/lib/firebase";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const handleAuth = () => {
-    // Later replace with real auth
-    navigate("/preferences"); // onboarding page
+  const redirectTo = location.state?.from?.pathname || "/dashboard";
+
+  const handleAuth = async () => {
+    try {
+      if (isLogin) {
+        await signInWithEmailAndPassword(auth, email, password);
+        navigate(redirectTo, { replace: true });
+        return;
+      }
+
+      const credential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const displayName = fullName.trim() || email.split("@")[0];
+      await updateProfile(credential.user, { displayName });
+      navigate("/preferences", { replace: true });
+    } catch (error: any) {
+      alert(error?.message || "Authentication failed. Please try again.");
+    }
+  };
+
+  const handleGoogleAuth = async () => {
+    try {
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(auth, provider);
+      navigate(redirectTo, { replace: true });
+    } catch (error: any) {
+      alert(error?.message || "Google sign-in failed. Please try again.");
+    }
   };
 
   return (
@@ -93,6 +133,8 @@ const Auth = () => {
                 <input
                   type="text"
                   placeholder="Full Name"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
                   className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-300 outline-none"
                 />
               )}
@@ -100,12 +142,16 @@ const Auth = () => {
               <input
                 type="email"
                 placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-300 outline-none"
               />
 
               <input
                 type="password"
                 placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-300 outline-none"
               />
 
@@ -132,7 +178,7 @@ const Auth = () => {
 
               {/* GOOGLE */}
               <button
-                onClick={handleAuth}
+                onClick={handleGoogleAuth}
                 className="
                   w-full
                   py-3
