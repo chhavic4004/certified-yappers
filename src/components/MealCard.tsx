@@ -1,8 +1,9 @@
 interface Props {
   image: string;
   name: string;
-  calories: number;
-  protein: number;
+  calories: number | string;
+  protein: number | string;
+  reason?: string[];
 }
 
 const MealCard = ({ image, name, calories, protein }: Props) => {

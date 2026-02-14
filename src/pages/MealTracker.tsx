@@ -264,7 +264,7 @@ export default MealTracker;
 
 /* ---------------- SMALL COMPONENTS ---------------- */
 
-const Metric = ({ title, value, desc }: any) => (
+const Metric = ({ title, value, desc }: { title: string; value: string | number; desc: string }) => (
   <div className="bg-white border rounded-2xl p-6 hover:shadow-md transition">
     <p className="text-gray-400">{title}</p>
     <h2 className="text-2xl font-bold">{value}</h2>
@@ -272,13 +272,13 @@ const Metric = ({ title, value, desc }: any) => (
   </div>
 );
 
-const Legend = ({ color, label }: any) => (
+const Legend = ({ color, label }: { color: string; label: string }) => (
   <div className="flex items-center gap-3">
     <div className={`w-4 h-4 rounded ${color}`} />
     {label}
   </div>
 );
 
-const Insight = ({ text }: any) => (
+const Insight = ({ text }: { text: string }) => (
   <p className="text-gray-600">{text}</p>
 );
