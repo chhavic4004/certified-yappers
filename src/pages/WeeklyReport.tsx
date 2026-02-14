@@ -1,153 +1,272 @@
-import { motion } from "framer-motion";
-import { TrendingUp, AlertTriangle } from "lucide-react";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-
-const healthScoreData = [
-  { day: "Mon", score: 72 },
-  { day: "Tue", score: 78 },
-  { day: "Wed", score: 65 },
-  { day: "Thu", score: 82 },
-  { day: "Fri", score: 88 },
-  { day: "Sat", score: 74 },
-  { day: "Sun", score: 85 },
-];
-
-const macroData = [
-  { name: "Protein", value: 30, color: "hsl(28, 90%, 55%)" },
-  { name: "Carbs", value: 45, color: "hsl(142, 60%, 45%)" },
-  { name: "Fats", value: 25, color: "hsl(200, 70%, 50%)" },
-];
-
-const microGaps = [
-  { nutrient: "Vitamin D", status: "low", percent: 45 },
-  { nutrient: "Iron", status: "moderate", percent: 68 },
-  { nutrient: "Calcium", status: "good", percent: 85 },
-  { nutrient: "B12", status: "good", percent: 92 },
-  { nutrient: "Zinc", status: "low", percent: 38 },
-];
-
-// Heatmap data — 4 weeks x 7 days
-const heatmapData = [
-  [3, 2, 3, 1, 3, 2, 0],
-  [3, 3, 2, 3, 1, 2, 3],
-  [2, 1, 3, 3, 3, 0, 2],
-  [3, 3, 2, 3, 3, 2, 1],
-];
-const dayLabels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-
-const getHeatColor = (val: number) => {
-  if (val === 3) return "bg-accent";
-  if (val === 2) return "bg-health-yellow";
-  if (val === 1) return "bg-health-red";
-  return "bg-secondary";
-};
+import { useRef } from "react";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
+import { useAuth } from "@/contexts/AuthContext";
 
 const WeeklyReport = () => {
+  const { user } = useAuth();
+  const reportRef = useRef<HTMLDivElement>(null);
+
+  const displayName =
+    user?.displayName || user?.email?.split("@")[0] || "User";
+
+  const today = new Date().toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+
+  /* ================= PDF ================= */
+
+  const downloadPDF = async () => {
+    if (!reportRef.current) return;
+
+    const canvas = await html2canvas(reportRef.current, {
+      scale: 3, // ultra sharp
+      useCORS: true,
+    });
+
+    const imgData = canvas.toDataURL("image/png");
+
+    const pdf = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+    });
+
+    const imgWidth = 210;
+    const pageHeight = 297;
+
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+    let heightLeft = imgHeight;
+    let position = 0;
+
+    pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+
+    while (heightLeft > 0) {
+      position = heightLeft - imgHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+    }
+
+    pdf.save(`FlavorAI_Report_${displayName}.pdf`);
+  };
+
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="font-display text-3xl font-bold text-foreground">Weekly Health Report</h1>
-        <p className="text-muted-foreground mt-1">Your nutrition analytics at a glance.</p>
-      </div>
+    <div className="min-h-screen bg-orange-50 flex flex-col items-center py-10 px-6">
 
-      <div className="grid md:grid-cols-2 gap-6">
-        {/* Health Score Trend */}
-        <div className="bg-card rounded-2xl p-6 border border-border shadow-card">
-          <div className="flex items-center gap-2 mb-4">
-            <TrendingUp className="w-5 h-5 text-primary" />
-            <h2 className="font-display font-semibold text-foreground">Health Score Trend</h2>
-          </div>
-          <ResponsiveContainer width="100%" height={200}>
-            <LineChart data={healthScoreData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(30, 15%, 90%)" />
-              <XAxis dataKey="day" tick={{ fontSize: 12, fill: "hsl(20, 8%, 50%)" }} />
-              <YAxis domain={[50, 100]} tick={{ fontSize: 12, fill: "hsl(20, 8%, 50%)" }} />
-              <Tooltip />
-              <Line type="monotone" dataKey="score" stroke="hsl(28, 90%, 55%)" strokeWidth={2.5} dot={{ fill: "hsl(28, 90%, 55%)", r: 4 }} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
+      {/* BUTTON */}
+      <button
+        onClick={downloadPDF}
+        className="
+          mb-6
+          px-7 py-3
+          bg-orange-500
+          text-white
+          rounded-xl
+          font-semibold
+          hover:scale-105
+          transition
+          shadow-md
+        "
+      >
+        Download PDF
+      </button>
 
-        {/* Macro Breakdown */}
-        <div className="bg-card rounded-2xl p-6 border border-border shadow-card">
-          <h2 className="font-display font-semibold text-foreground mb-4">Macro Breakdown</h2>
-          <div className="flex items-center gap-6">
-            <ResponsiveContainer width={140} height={140}>
-              <PieChart>
-                <Pie data={macroData} innerRadius={40} outerRadius={65} dataKey="value" paddingAngle={3}>
-                  {macroData.map((entry, i) => (
-                    <Cell key={i} fill={entry.color} />
-                  ))}
-                </Pie>
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="space-y-2">
-              {macroData.map((m) => (
-                <div key={m.name} className="flex items-center gap-2 text-sm">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: m.color }} />
-                  <span className="text-foreground font-medium">{m.name}</span>
-                  <span className="text-muted-foreground">{m.value}%</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* REPORT */}
+      <div
+        ref={reportRef}
+        className="w-full max-w-5xl bg-white rounded-3xl p-12 space-y-10"
+      >
 
-      {/* Micronutrient Gaps */}
-      <div className="bg-card rounded-2xl p-6 border border-border shadow-card">
-        <div className="flex items-center gap-2 mb-4">
-          <AlertTriangle className="w-5 h-5 text-health-yellow" />
-          <h2 className="font-display font-semibold text-foreground">Micronutrient Gaps</h2>
-        </div>
-        <div className="space-y-3">
-          {microGaps.map((item) => (
-            <div key={item.nutrient} className="flex items-center gap-4">
-              <span className="text-sm font-medium text-foreground w-24">{item.nutrient}</span>
-              <div className="flex-1 h-2.5 rounded-full bg-secondary overflow-hidden">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${item.percent}%` }}
-                  transition={{ duration: 0.8 }}
-                  className={`h-full rounded-full ${
-                    item.percent >= 80 ? "bg-accent" : item.percent >= 60 ? "bg-health-yellow" : "bg-health-red"
-                  }`}
-                />
-              </div>
-              <span className="text-xs text-muted-foreground w-10 text-right">{item.percent}%</span>
-            </div>
-          ))}
-        </div>
-      </div>
+        {/* HEADER */}
+        <Header displayName={displayName} today={today} />
 
-      {/* Heatmap */}
-      <div className="bg-card rounded-2xl p-6 border border-border shadow-card">
-        <h2 className="font-display font-semibold text-foreground mb-4">Your Eating Consistency</h2>
-        <div className="space-y-2">
-          {/* Day labels */}
-          <div className="flex gap-2 ml-16">
-            {dayLabels.map((d) => (
-              <span key={d} className="w-8 text-center text-xs text-muted-foreground">{d}</span>
-            ))}
-          </div>
-          {heatmapData.map((week, wi) => (
-            <div key={wi} className="flex items-center gap-2">
-              <span className="text-xs text-muted-foreground w-14 text-right">Week {wi + 1}</span>
-              {week.map((val, di) => (
-                <div key={di} className={`w-8 h-8 rounded-md ${getHeatColor(val)} transition-colors`} title={`${val}/3 meals`} />
-              ))}
-            </div>
-          ))}
-        </div>
-        <div className="flex items-center gap-4 mt-4 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-accent" /> Optimal</span>
-          <span className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-health-yellow" /> Moderate</span>
-          <span className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-health-red" /> Poor</span>
-          <span className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-secondary" /> Missed</span>
-        </div>
+        {/* SCORES */}
+        <Scores />
+
+        {/* MACRO */}
+        <Macro />
+
+        {/* AI SUMMARY */}
+        <AISummary />
+
+        {/* IMPROVEMENTS */}
+        <Improvements />
+
+        {/* FUTURE */}
+        <Predictions />
+
+        {/* FOOTER */}
+        <Footer />
+
       </div>
     </div>
   );
 };
 
 export default WeeklyReport;
+
+/* ================= COMPONENTS ================= */
+
+const Header = ({ displayName, today }: any) => (
+  <div className="border-b pb-6">
+    <h1 className="text-4xl font-bold text-gray-900">
+      FlavorAI™ Nutrition Intelligence Report
+    </h1>
+
+    <p className="text-gray-500 mt-2">
+      Generated for <b>{displayName}</b>
+    </p>
+
+    <p className="text-gray-400 text-sm">
+      Report Date: {today}
+    </p>
+  </div>
+);
+
+/* ---------- SCORES ---------- */
+
+const Scores = () => (
+  <div className="grid grid-cols-2 gap-6">
+
+    <ScoreCard
+      title="Health Score"
+      score="91"
+      desc="Your nutritional behavior strongly supports metabolic efficiency, cardiovascular stability, and long-term wellness."
+    />
+
+    <ScoreCard
+      title="Taste Intelligence"
+      score="88"
+      desc="FlavorAI has mapped your flavor psychology with high precision — enabling smarter, satisfaction-optimized meal recommendations."
+    />
+
+  </div>
+);
+
+const ScoreCard = ({ title, score, desc }: any) => (
+  <div className="border rounded-2xl p-6 flex gap-6 items-center">
+    <div className="w-24 h-24 rounded-full border-8 border-orange-400 flex items-center justify-center text-2xl font-bold">
+      {score}
+    </div>
+
+    <div>
+      <h3 className="text-xl font-bold">{title}</h3>
+      <p className="text-gray-600 mt-1">{desc}</p>
+    </div>
+  </div>
+);
+
+/* ---------- MACRO ---------- */
+
+const Macro = () => (
+  <Section title="Macro Distribution">
+
+    <p className="text-gray-600 max-w-2xl">
+      Your macronutrient profile indicates a strong balance between
+      sustained energy release, muscle recovery, and hormonal regulation.
+    </p>
+
+    <div className="flex items-center gap-10 mt-6">
+
+      <div
+        className="w-40 h-40 rounded-full"
+        style={{
+          background:
+            "conic-gradient(#f97316 0% 40%, #22c55e 40% 70%, #38bdf8 70% 100%)",
+        }}
+      />
+
+      <div className="space-y-2 text-gray-700">
+        <Legend color="bg-orange-500" text="Carbohydrates — 40%" />
+        <Legend color="bg-green-500" text="Protein — 30%" />
+        <Legend color="bg-sky-400" text="Fats — 30%" />
+      </div>
+
+    </div>
+
+  </Section>
+);
+
+/* ---------- AI SUMMARY ---------- */
+
+const AISummary = () => (
+  <Section title="AI Behavioral Summary">
+
+    <Insight text="✅ Strong weekday dietary consistency indicates structured eating behavior." />
+    <Insight text="🔥 Protein intake improved by 18%, significantly enhancing metabolic response." />
+    <Insight text="⚖️ Calorie variability remains low — a key predictor of appetite regulation." />
+    <Insight text="🧠 Meal timing aligns well with circadian metabolic windows." />
+
+  </Section>
+);
+
+/* ---------- IMPROVEMENTS ---------- */
+
+const Improvements = () => (
+  <Section title="Key Improvements Recommended">
+
+    <Improve text="Increase daily fiber intake by 6–8g to enhance gut microbiome diversity." />
+    <Improve text="Hydration is slightly below optimal — target 2.3–2.7L daily." />
+    <Improve text="Reduce late-night eating to improve sleep-driven hormonal recovery." />
+    <Improve text="Introduce more leafy greens to boost micronutrient density." />
+
+  </Section>
+);
+
+/* ---------- FUTURE ---------- */
+
+const Predictions = () => (
+  <Section title="Predictive Health Outlook">
+
+    <p className="text-gray-700">
+      If your current behavior pattern continues, FlavorAI predicts:
+    </p>
+
+    <ul className="list-disc ml-6 mt-3 text-gray-700 space-y-1">
+      <li>7–10% improvement in metabolic efficiency</li>
+      <li>Higher daily energy stability</li>
+      <li>Better glucose control</li>
+      <li>Reduced long-term inflammation markers</li>
+    </ul>
+
+  </Section>
+);
+
+/* ---------- FOOTER ---------- */
+
+const Footer = () => (
+  <div className="border-t pt-6 text-sm text-gray-400">
+    This report was automatically generated by FlavorAI™
+    and is intended for wellness insights only.
+    It should not replace professional medical advice.
+  </div>
+);
+
+/* ---------- SMALL ---------- */
+
+const Section = ({ title, children }: any) => (
+  <div>
+    <h2 className="text-2xl font-bold mb-4">{title}</h2>
+    {children}
+  </div>
+);
+
+const Legend = ({ color, text }: any) => (
+  <div className="flex items-center gap-2">
+    <div className={`w-4 h-4 rounded ${color}`} />
+    {text}
+  </div>
+);
+
+const Insight = ({ text }: any) => (
+  <p className="text-gray-700 mb-2">{text}</p>
+);
+
+const Improve = ({ text }: any) => (
+  <p className="text-gray-700 mb-2">👉 {text}</p>
+);
