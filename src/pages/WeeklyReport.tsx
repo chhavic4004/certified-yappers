@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, type ReactNode } from "react";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { useAuth } from "@/contexts/AuthContext";
@@ -112,7 +112,7 @@ export default WeeklyReport;
 
 /* ================= COMPONENTS ================= */
 
-const Header = ({ displayName, today }: any) => (
+const Header = ({ displayName, today }: { displayName: string; today: string }) => (
   <div className="border-b pb-6">
     <h1 className="text-4xl font-bold text-gray-900">
       FlavorAI™ Nutrition Intelligence Report
@@ -148,7 +148,15 @@ const Scores = () => (
   </div>
 );
 
-const ScoreCard = ({ title, score, desc }: any) => (
+const ScoreCard = ({
+  title,
+  score,
+  desc,
+}: {
+  title: string;
+  score: string | number;
+  desc: string;
+}) => (
   <div className="border rounded-2xl p-6 flex gap-6 items-center">
     <div className="w-24 h-24 rounded-full border-8 border-orange-400 flex items-center justify-center text-2xl font-bold">
       {score}
@@ -249,24 +257,24 @@ const Footer = () => (
 
 /* ---------- SMALL ---------- */
 
-const Section = ({ title, children }: any) => (
+const Section = ({ title, children }: { title: string; children: ReactNode }) => (
   <div>
     <h2 className="text-2xl font-bold mb-4">{title}</h2>
     {children}
   </div>
 );
 
-const Legend = ({ color, text }: any) => (
+const Legend = ({ color, text }: { color: string; text: string }) => (
   <div className="flex items-center gap-2">
     <div className={`w-4 h-4 rounded ${color}`} />
     {text}
   </div>
 );
 
-const Insight = ({ text }: any) => (
+const Insight = ({ text }: { text: string }) => (
   <p className="text-gray-700 mb-2">{text}</p>
 );
 
-const Improve = ({ text }: any) => (
+const Improve = ({ text }: { text: string }) => (
   <p className="text-gray-700 mb-2">👉 {text}</p>
 );
