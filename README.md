@@ -20,6 +20,7 @@ FlavourAI aims to become your **daily AI nutrition companion** — combining beh
 - Taste Intelligence analysis  
 - Behavioral nutrition insights  
 - Recently analyzed meal patterns  
+-ChatBot Feature to easily ask questions 
 
 ---
 
@@ -63,6 +64,7 @@ FlavourAI aims to become your **daily AI nutrition companion** — combining beh
 - 🧩 **shadcn/ui**
 - Modern component architecture
 - Fully responsive layout
+-python for model
 
 ---
 

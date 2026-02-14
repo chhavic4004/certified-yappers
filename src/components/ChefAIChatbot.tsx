@@ -5,7 +5,7 @@ interface Message {
   content: string;
 }
 
-const API_URL = "https://chefai-chatbot-backend.onrender.com/chat";
+const API_URL = "http://127.0.0.1:8000/chat";
 
 export default function ChefAIChatbot() {
   const [isOpen, setIsOpen] = useState(false);
