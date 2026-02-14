@@ -66,6 +66,5 @@ FlavourAI aims to become your **daily AI nutrition companion** — combining beh
 
 ---
 
-## 📦 Installation
 
 
