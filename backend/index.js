@@ -1,15 +1,6 @@
-import dotenv from "dotenv";
 import express from "express";
 import fetch from "node-fetch";
 import cors from "cors";
-import path from "path";
-import { fileURLToPath } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-dotenv.config({ path: path.join(__dirname, ".env") });
-dotenv.config({ path: path.join(__dirname, "..", ".env") });
-dotenv.config({ path: path.join(__dirname, "..", "src", ".env") });
 
 const app = express();
 app.use(cors());
@@ -112,7 +103,7 @@ app.post("/api/meals", async (req, res) => {
     }
 
     async function generateMealsWithLLM({ cuisine, diet, caloriesMin, caloriesMax, proteinMin, proteinMax }) {
-      const groqKey = process.env.GROQ_API_KEY || process.env.VITE_GROQ_API_KEY;
+      const groqKey = process.env.GROQ_API_KEY;
       const openaiKey = process.env.OPENAI_API_KEY;
       const useGroq = !!groqKey;
       const key = useGroq ? groqKey : openaiKey;
@@ -270,20 +261,6 @@ app.post("/api/meals", async (req, res) => {
       protein: r?.protein ?? null,
       region: r?.Region ?? r?.region ?? cuisine ?? null,
     }));
-
-    if (meals.length === 0) {
-      const llmMeals = await generateMealsWithLLM({
-        cuisine,
-        diet,
-        caloriesMin: useCaloriesMin,
-        caloriesMax: useCaloriesMax,
-        proteinMin: useProteinMin,
-        proteinMax: useProteinMax,
-      });
-      if (Array.isArray(llmMeals) && llmMeals.length > 0) {
-        return res.json({ meals: llmMeals });
-      }
-    }
 
     res.json({ meals });
   

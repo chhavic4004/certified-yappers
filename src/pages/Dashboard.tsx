@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 import { useEffect, useState, type ChangeEvent, type ReactNode } from "react";
-=======
-import { useEffect, useState, type ChangeEvent } from "react";
->>>>>>> 6db257cb85218e004a187af17c654fb80750cac5
 import { useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
@@ -403,11 +399,7 @@ export default Dashboard;
 
 /* COMPONENTS */
 
-<<<<<<< HEAD
 const ProfileField = ({ label, value }: { label: string; value: string | number }) => (
-=======
-const ProfileField = ({ label, value }: any) => (
->>>>>>> 6db257cb85218e004a187af17c654fb80750cac5
   <div>
     <p className="text-gray-400 mb-1">{label}</p>
     <p className="font-semibold text-lg break-words">{value}</p>
@@ -436,7 +428,6 @@ const InputField = ({
   </div>
 );
 
-<<<<<<< HEAD
 const ScoreCard = ({
   title,
   score,
@@ -451,10 +442,6 @@ const ScoreCard = ({
   onClick: () => void;
 }) => {
   const colorMap: Record<ScoreColor, string> = {
-=======
-const ScoreCard = ({ title, score, color, desc, onClick }: any) => {
-  const colorMap: any = {
->>>>>>> 6db257cb85218e004a187af17c654fb80750cac5
     green: "text-green-600 border-green-200",
     orange: "text-orange-600 border-orange-200",
   };

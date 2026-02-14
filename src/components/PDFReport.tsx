@@ -1,3 +1,5 @@
+import { useAuth } from "@/contexts/AuthContext";
+
 interface PDFReportProps {
   displayName: string;
 }
@@ -133,19 +135,7 @@ export default PDFReport;
 
 /* COMPONENTS */
 
-const ScoreCard = ({
-  score,
-  title,
-  description,
-  color,
-  borderColor,
-}: {
-  score: number;
-  title: string;
-  description: string;
-  color: string;
-  borderColor: string;
-}) => (
+const ScoreCard = ({ score, title, description, color, borderColor }: any) => (
   <div className={`${color} border-2 ${borderColor} rounded-2xl p-6`}>
     <div className="flex items-start gap-4">
       <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center border-2 border-orange-500">
@@ -159,21 +149,21 @@ const ScoreCard = ({
   </div>
 );
 
-const MacroItem = ({ color, label }: { color: string; label: string }) => (
+const MacroItem = ({ color, label }: any) => (
   <div className="flex items-center gap-3">
     <div className={`w-4 h-4 rounded ${color}`} />
     <span className="text-sm text-gray-700">{label}</span>
   </div>
 );
 
-const BulletPoint = ({ color, text }: { color: string; text: string }) => (
+const BulletPoint = ({ color, text }: any) => (
   <div className="flex items-start gap-3">
     <div className={`w-2 h-2 rounded-full ${color} mt-1.5 flex-shrink-0`} />
     <p className="text-sm text-gray-700">{text}</p>
   </div>
 );
 
-const RecommendationItem = ({ text }: { text: string }) => (
+const RecommendationItem = ({ text }: any) => (
   <div className="flex items-start gap-3">
     <span className="text-orange-500 flex-shrink-0">👉</span>
     <p className="text-sm text-gray-700">{text}</p>

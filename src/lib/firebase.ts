@@ -21,10 +21,6 @@ const initializeAnalytics = async () => {
     return null;
   }
 
-  if (!import.meta.env.PROD) {
-    return null;
-  }
-
   const supported = await isSupported();
   return supported ? getAnalytics(app) : null;
 };
