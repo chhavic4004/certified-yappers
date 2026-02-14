@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-import { useState, type ChangeEvent } from "react";
-=======
-import { useEffect, useState } from "react";
->>>>>>> c52c79ea6272fc08353e9c132f832e352a1af8ff
+import { useEffect, useState, type ChangeEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
@@ -23,13 +19,8 @@ const Dashboard = () => {
     user?.displayName || user?.email?.split("@")[0] || "User";
   const resolvedEmail = user?.email || "";
 
-<<<<<<< HEAD
   const [profile, setProfile] = useState<Profile>({
-    name: "Alex Johnson",
-=======
-  const [profile, setProfile] = useState({
     name: resolvedName,
->>>>>>> c52c79ea6272fc08353e9c132f832e352a1af8ff
     age: 24,
     email: resolvedEmail,
     activity: "Moderately Active",
@@ -406,25 +397,7 @@ export default Dashboard;
 
 /* COMPONENTS */
 
-<<<<<<< HEAD
-/* ---------- Components ---------- */
-
-const ProfileField = ({
-  label,
-  name,
-  value,
-  editing,
-  onChange,
-}: {
-  label: string;
-  name: keyof Profile;
-  value: string | number;
-  editing: boolean;
-  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
-}) => (
-=======
 const ProfileField = ({ label, value }: any) => (
->>>>>>> c52c79ea6272fc08353e9c132f832e352a1af8ff
   <div>
     <p className="text-gray-400 mb-1">{label}</p>
     <p className="font-semibold text-lg break-words">{value}</p>
@@ -443,23 +416,8 @@ const InputField = ({label,name,value,onChange}:any)=>(
   </div>
 );
 
-<<<<<<< HEAD
-const ScoreCard = ({
-  title,
-  score,
-  color,
-  desc,
-}: {
-  title: string;
-  score: number;
-  color: "green" | "orange";
-  desc: string;
-}) => {
-  const colorMap: Record<"green" | "orange", string> = {
-=======
 const ScoreCard = ({ title, score, color, desc, onClick }: any) => {
   const colorMap: any = {
->>>>>>> c52c79ea6272fc08353e9c132f832e352a1af8ff
     green: "text-green-600 border-green-200",
     orange: "text-orange-600 border-orange-200",
   };

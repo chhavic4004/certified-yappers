@@ -420,22 +420,14 @@ const DownloadReport = ({ onDownload }: any) => (
 
 /* ---------------- SMALL COMPONENTS ---------------- */
 
-<<<<<<< HEAD
-const Metric = ({ title, value, desc }: { title: string; value: string | number; desc: string }) => (
-  <div className="bg-white border rounded-2xl p-6 hover:shadow-md transition">
-=======
 const Metric = ({ title, value, desc }: any) => (
   <div className="border rounded-2xl p-6 hover:shadow-md transition">
->>>>>>> c52c79ea6272fc08353e9c132f832e352a1af8ff
     <p className="text-gray-400">{title}</p>
     <h2 className="text-2xl font-bold">{value}</h2>
     <p className="text-xs text-gray-500 mt-2">{desc}</p>
   </div>
 );
 
-<<<<<<< HEAD
-const Legend = ({ color, label }: { color: string; label: string }) => (
-=======
 const AnalysisCard = ({ title, value, desc }: any) => (
   <div className="bg-orange-50 border border-orange-100 rounded-2xl p-5">
     <p className="text-sm text-orange-500 font-semibold">{title}</p>
@@ -449,17 +441,12 @@ const Insight = ({ text }: any) => (
 );
 
 const Legend = ({ color, label }: any) => (
->>>>>>> c52c79ea6272fc08353e9c132f832e352a1af8ff
   <div className="flex items-center gap-3">
     <div className={`w-4 h-4 rounded ${color}`} />
     {label}
   </div>
 );
 
-<<<<<<< HEAD
-const Insight = ({ text }: { text: string }) => (
-  <p className="text-gray-600">{text}</p>
-=======
 const ColorBox = ({ color }: any) => (
   <div className={`w-4 h-4 rounded ${color}`} />
 );
@@ -541,5 +528,4 @@ const MealHistoryCard = ({ date, meal, calories, note, tags, preferences }: any)
       </div>
     </div>
   </div>
->>>>>>> c52c79ea6272fc08353e9c132f832e352a1af8ff
 );
