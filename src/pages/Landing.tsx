@@ -52,3 +52,5 @@ shadow-2xl
 };
 
 export default Landing;
+console.log(import.meta.env.VITE_RECIPE_API_KEY);
+
