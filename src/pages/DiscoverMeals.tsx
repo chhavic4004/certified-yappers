@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 
+/* ---------------- TYPES ---------------- */
+
 type Meal = {
   Recipe_title: string;
   Calories: string;
@@ -11,6 +13,8 @@ type Meal = {
   Sub_region?: string;
 };
 
+/* ---------------- COMPONENT ---------------- */
+
 const DiscoverMeals = () => {
   const { user } = useAuth();
 
@@ -18,39 +22,53 @@ const DiscoverMeals = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  /* ✅ Load Preferences */
+  /* ✅ Load Preferences safely */
   const preferences = JSON.parse(
     localStorage.getItem("flavourai.preferences") || "{}"
   );
 
+  // fallback cuisine
   const cuisine = preferences?.cuisine?.[0] || "Indian";
 
+  /* ---------------- FETCH ---------------- */
+
   const fetchMeals = async () => {
-  try {
-    const res = await fetch(
-      "https://api.foodoscope.com/recipe2-api/byutensils/utensils?utensils=pan&page=1&limit=10",
-      {
+    try {
+      setLoading(true);
+      setError("");
+
+      const url = `https://api.foodoscope.com/recipe2-api/recipes_cuisine/cuisine/${cuisine}?page=1&page_size=12`;
+
+      const res = await fetch(url, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${import.meta.env.VITE_FOODOSCOPE_KEY}`,
           "Content-Type": "application/json",
         },
+      });
+
+      if (!res.ok) {
+        throw new Error("API request failed");
       }
-    );
 
-    const data = await res.json();
+      const data = await res.json();
 
-    console.log("API DATA:", data);
+      // ⭐ MOST IMPORTANT LINE
+      setMeals(data?.data || []);
 
-  } catch (err) {
-    console.error(err);
-  }
-};
-
+    } catch (err) {
+      console.error(err);
+      setError("Failed to fetch personalized meals.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchMeals();
   }, []);
+
+  /* ---------------- UI ---------------- */
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-white p-10">
@@ -82,13 +100,20 @@ const DiscoverMeals = () => {
 
         {/* ERROR */}
         {error && (
-          <div className="bg-red-50 border border-red-200 p-6 rounded-2xl">
+          <div className="bg-red-50 border border-red-200 p-6 rounded-2xl text-red-600 font-medium">
             {error}
           </div>
         )}
 
+        {/* EMPTY */}
+        {!loading && meals.length === 0 && !error && (
+          <div className="text-center text-gray-500 py-20">
+            No meals found for this cuisine.
+          </div>
+        )}
+
         {/* MEALS GRID */}
-        {!loading && !error && (
+        {!loading && !error && meals.length > 0 && (
           <div className="grid md:grid-cols-3 gap-8">
             {meals.map((meal, index) => (
               <MealCard key={index} meal={meal} />
@@ -98,8 +123,6 @@ const DiscoverMeals = () => {
       </div>
     </div>
   );
-  console.log(import.meta.env.VITE_FOODOSCOPE_KEY);
-
 };
 
 export default DiscoverMeals;
@@ -126,7 +149,7 @@ const MealCard = ({ meal }: { meal: Meal }) => (
 
     <div className="grid grid-cols-2 gap-3 text-sm">
 
-      <Stat label="Calories" value={meal.Calories} />
+      <Stat label="Calories" value={`${meal.Calories} kcal`} />
       <Stat label="Cook Time" value={`${meal.cook_time} min`} />
       <Stat label="Prep Time" value={`${meal.prep_time} min`} />
       <Stat label="Servings" value={meal.servings} />
@@ -156,5 +179,4 @@ const Stat = ({ label, value }: any) => (
     <p className="text-gray-400 text-xs">{label}</p>
     <p className="font-semibold">{value}</p>
   </div>
-  
 );

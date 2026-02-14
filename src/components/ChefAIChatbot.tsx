@@ -5,7 +5,7 @@ interface Message {
   content: string;
 }
 
-const API_URL = "http://127.0.0.1:8000/chat";
+const API_URL = "https://chefai-chatbot-backend.onrender.com/chat";
 
 export default function ChefAIChatbot() {
   const [isOpen, setIsOpen] = useState(false);
@@ -20,31 +20,39 @@ export default function ChefAIChatbot() {
 
     const userMessage: Message = { role: "user", content: input };
     setMessages((prev) => [...prev, userMessage]);
+    const userInput = input;
     setInput("");
     setLoading(true);
 
     try {
       const res = await fetch(API_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
-          message: input,
+          message: userInput,
           session_id: sessionId,
         }),
       });
+
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
 
       const data = await res.json();
 
       const aiMessage: Message = {
         role: "assistant",
-        content: data.response,
+        content: data.response || data.message || "Sorry, I couldn't process that.",
       };
 
       setMessages((prev) => [...prev, aiMessage]);
     } catch (err) {
+      console.error("Chat error:", err);
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: "⚠️ Error connecting to server." },
+        { role: "assistant", content: "⚠️ Error connecting to server. Please try again." },
       ]);
     } finally {
       setLoading(false);
@@ -54,12 +62,18 @@ export default function ChefAIChatbot() {
   return (
     <>
       {/* FLOATING BUTTON */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="chefai-fab"
-      >
-        🍽 Ask ChefAI
-      </button>
+      <div className="chefai-fab-wrapper">
+        {/* RIPPLE RINGS */}
+        <span className="chefai-ripple-ring chefai-ripple-1"></span>
+        <span className="chefai-ripple-ring chefai-ripple-2"></span>
+        
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="chefai-fab"
+        >
+          🤖 Ask ChefAI
+        </button>
+      </div>
 
       {/* CHAT WINDOW */}
       {isOpen && (
@@ -101,25 +115,67 @@ export default function ChefAIChatbot() {
 
       <style>{`
       
-      /* Floating Button */
-      .chefai-fab {
+      /* Floating Button Wrapper */
+      .chefai-fab-wrapper {
         position: fixed;
         bottom: 30px;
         right: 30px;
-        background: #ff7a18;
+        z-index: 1000;
+      }
+
+      /* Ripple Rings */
+      .chefai-ripple-ring {
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        pointer-events: none;
+      }
+
+      .chefai-ripple-1 {
+        background: rgba(255, 122, 24, 0.3);
+        animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+      }
+
+      .chefai-ripple-2 {
+        background: rgba(255, 122, 24, 0.2);
+        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      }
+
+      @keyframes ping {
+        75%, 100% {
+          transform: scale(2);
+          opacity: 0;
+        }
+      }
+
+      @keyframes pulse {
+        0%, 100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+
+      /* Floating Button */
+      .chefai-fab {
+        position: relative;
+        background: linear-gradient(135deg, #ff7a18 0%, #ff6600 100%);
         color: white;
         border: none;
         padding: 14px 22px;
         border-radius: 30px;
         font-weight: 600;
         cursor: pointer;
-        box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        box-shadow: 0 8px 20px rgba(255, 122, 24, 0.3);
         overflow: hidden;
-        transition: transform 0.2s ease;
+        transition: all 0.3s ease;
+        z-index: 1001;
       }
 
       .chefai-fab:hover {
-        transform: translateY(-2px);
+        transform: translateY(-2px) scale(1.05);
+        box-shadow: 0 12px 30px rgba(255, 122, 24, 0.4);
       }
 
       /* Ripple effect */
