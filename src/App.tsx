@@ -22,11 +22,11 @@ function App() {
         {/* PUBLIC */}
         <Route path="/" element={<Landing />} />
         <Route path="/auth" element={<Auth />} />
-        <Route path="/preferences" element={<PreferenceSetup />} />
 
         {/* APP LAYOUT */}
         <Route element={<AppLayout />}>
 
+          <Route path="/preferences" element={<PreferenceSetup />} />
           <Route path="/suggestions" element={<MealSuggestion />} />
           <Route
             path="/dashboard"

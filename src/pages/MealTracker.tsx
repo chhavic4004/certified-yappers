@@ -1,10 +1,14 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
+import PDFReport from "@/components/PDFReport";
 
 /* ---------------- COMPONENT ---------------- */
 
 const MealTracker = () => {
   const { user } = useAuth();
+  const pdfRef = useRef<HTMLDivElement>(null);
 
   const displayName =
     user?.displayName || user?.email?.split("@")[0] || "you";
@@ -102,9 +106,61 @@ const MealTracker = () => {
     },
   ];
 
+  const handleDownloadPDF = async () => {
+    if (!pdfRef.current) return;
+
+    try {
+      const canvas = await html2canvas(pdfRef.current, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: "#ffffff",
+      });
+
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+      });
+
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      const pageHeight = pdf.internal.pageSize.getHeight();
+
+      let heightLeft = pdfHeight;
+      let position = 0;
+
+      // Add first page
+      pdf.addImage(imgData, "PNG", 0, position, pdfWidth, pdfHeight);
+      heightLeft -= pageHeight;
+
+      // Add additional pages if content is longer
+      while (heightLeft > 0) {
+        position = heightLeft - pdfHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, "PNG", 0, position, pdfWidth, pdfHeight);
+        heightLeft -= pageHeight;
+      }
+
+      pdf.save(`FlavorAI-Report-${displayName}-${new Date().toISOString().split("T")[0]}.pdf`);
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-white flex justify-center px-6 py-10">
-      <div className="w-full max-w-7xl bg-white rounded-3xl border border-orange-100 p-10 space-y-12">
+    <>
+      {/* HIDDEN PDF REPORT */}
+      <div className="fixed -left-[9999px] top-0">
+        <div ref={pdfRef}>
+          <PDFReport displayName={displayName} />
+        </div>
+      </div>
+
+      {/* MAIN TRACKER PAGE */}
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-white flex justify-center px-6 py-10">
+        <div className="w-full max-w-7xl bg-white rounded-3xl border border-orange-100 p-10 space-y-12">
 
         {/* HEADER */}
         <Header user={user} displayName={displayName} avatarInitial={avatarInitial} />
@@ -129,11 +185,12 @@ const MealTracker = () => {
 
         {/* AI */}
         <AIAnalysis />
-
+        
         {/* REPORT */}
-        <DownloadReport />
+        <DownloadReport onDownload={handleDownloadPDF} />
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
@@ -340,20 +397,23 @@ const AIAnalysis = () => (
 
 /* ---------------- REPORT ---------------- */
 
-const DownloadReport = () => (
+const DownloadReport = ({ onDownload }: any) => (
   <div className="rounded-3xl p-10 bg-gradient-to-r from-orange-500 to-orange-600 text-white flex justify-between items-center">
     <div>
       <h2 className="text-2xl font-bold mb-2">
         Download Your Full Health Report 🚀
       </h2>
 
-      <button className="mt-5 px-6 py-3 rounded-xl bg-yellow-300 text-black font-semibold hover:scale-105 transition">
+      <button onClick={onDownload} className="mt-5 px-6 py-3 rounded-xl bg-yellow-300 text-black font-semibold hover:scale-105 transition">
         Download Report
       </button>
     </div>
 
-    <div className="hidden md:flex w-32 h-32 rounded-full bg-white/30 items-center justify-center text-3xl font-bold">
-      PDF
+    <div className="hidden md:flex relative w-32 h-32">
+      <div className="absolute inset-0 rounded-full bg-white/20 animate-ping" />
+      <div className="relative w-32 h-32 rounded-full bg-white/30 flex items-center justify-center text-3xl font-bold">
+        PDF
+      </div>
     </div>
   </div>
 );
