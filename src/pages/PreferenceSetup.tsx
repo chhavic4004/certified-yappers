@@ -66,11 +66,16 @@ const PreferenceSetup = () => {
       const arr = prev[category] as string[];
       const exists = arr.includes(value);
 
+      if (category === "cuisine" || category === "diet") {
+        return {
+          ...prev,
+          [category]: exists ? [] : [value],
+        };
+      }
+
       return {
         ...prev,
-        [category]: exists
-          ? arr.filter((v) => v !== value)
-          : [...arr, value],
+        [category]: exists ? arr.filter((v) => v !== value) : [...arr, value],
       };
     });
   };
