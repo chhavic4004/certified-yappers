@@ -33,8 +33,21 @@ app.post("/api/meals", async (req, res) => {
     const useProteinMin = inferred.c;
     const useProteinMax = inferred.d;
 
+    function mapCuisineRegion(region) {
+      const map = {
+        Indian: "Indian",
+        Asian: "Asian",
+        Mediterranean: "Mediterranean",
+        Mexican: "Mexican",
+        Italian: "Italian",
+        Continental: "European",
+      };
+      return map[region] || region;
+    }
+
     async function fetchCuisine(region) {
-      const url = `${BASE_URL}/recipe2-api/recipes_cuisine/cuisine/${encodeURIComponent(region)}?page=1&page_size=12`;
+      const r = mapCuisineRegion(region);
+      const url = `${BASE_URL}/recipe2-api/recipes_cuisine/cuisine/${encodeURIComponent(r)}?page=1&page_size=12`;
       const response = await fetch(url, {
         headers: {
           Authorization: `Bearer ${API_KEY}`,
@@ -203,6 +216,7 @@ app.post("/api/meals", async (req, res) => {
 
     let merged = base;
 
+    const cuisineIds = new Set(Array.from(byId(cuisineList).keys()));
     if (calsList.length > 0) {
       const calsIds = new Set(Array.from(byId(calsList).keys()));
       merged = merged.filter((r) => calsIds.has(r?.Recipe_id ?? r?._id ?? r?.id));
@@ -254,13 +268,39 @@ app.post("/api/meals", async (req, res) => {
       });
     }
 
-    const meals = (merged || []).slice(0, 12).map((r) => ({
-      id: r?.Recipe_id ?? r?._id ?? null,
-      name: r?.Recipe_title ?? r?.name ?? r?.title ?? "Untitled",
-      calories: r?.calories ?? null,
-      protein: r?.protein ?? null,
-      region: r?.Region ?? r?.region ?? cuisine ?? null,
-    }));
+    const meals = (merged || []).slice(0, 12).map((r) => {
+      const id = r?.Recipe_id ?? r?._id ?? null;
+      const calories = r?.calories ?? null;
+      const protein = r?.protein ?? null;
+      const regionVal = r?.Region ?? r?.region ?? cuisine ?? null;
+      const reasons = [];
+      if (cuisine && id && cuisineIds.has(id)) {
+        reasons.push(`Cuisine match: ${cuisine}`);
+      }
+      if (diet) {
+        reasons.push(`Diet-friendly: ${diet}`);
+      }
+      if (typeof useCaloriesMin === "number" || typeof useCaloriesMax === "number") {
+        const parts = [];
+        if (typeof useCaloriesMin === "number") parts.push(`≥${useCaloriesMin} kcal`);
+        if (typeof useCaloriesMax === "number") parts.push(`≤${useCaloriesMax} kcal`);
+        if (parts.length) reasons.push(`Calories ${parts.join(" & ")}`);
+      }
+      if (typeof useProteinMin === "number" || typeof useProteinMax === "number") {
+        const parts = [];
+        if (typeof useProteinMin === "number") parts.push(`≥${useProteinMin}g protein`);
+        if (typeof useProteinMax === "number") parts.push(`≤${useProteinMax}g protein`);
+        if (parts.length) reasons.push(`Protein ${parts.join(" & ")}`);
+      }
+      return {
+        id,
+        name: r?.Recipe_title ?? r?.name ?? r?.title ?? "Untitled",
+        calories,
+        protein,
+        region: regionVal,
+        reasons,
+      };
+    });
 
     res.json({ meals });
   
