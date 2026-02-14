@@ -42,11 +42,7 @@
     "@radix-ui/react-toggle-group": "^1.1.10",
     "@radix-ui/react-tooltip": "^1.2.7",
     "@tanstack/react-query": "^5.83.0",
-<<<<<<< HEAD
     "axios": "^1.13.5",
-=======
-    "@vitejs/plugin-react": "^5.1.4",
->>>>>>> c52c79ea6272fc08353e9c132f832e352a1af8ff
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
