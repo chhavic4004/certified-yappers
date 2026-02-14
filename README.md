@@ -68,7 +68,4 @@ FlavourAI aims to become your **daily AI nutrition companion** — combining beh
 
 ## 📦 Installation
 
-Clone the repository:
 
-```bash
-git clone https://github.com/HarshitaGupta-610/FlavourAI.git
