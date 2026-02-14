@@ -187,7 +187,7 @@ export default Taste;
 
 /* SMALL COMPONENT */
 
-const Timeline = ({ title, desc }: any) => (
+const Timeline = ({ title, desc }: { title: string; desc: string }) => (
   <div className="flex gap-4 items-start">
 
     <div className="w-4 h-4 mt-1 rounded-full bg-orange-500" />

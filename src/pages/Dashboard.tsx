@@ -1,10 +1,17 @@
-import { useState } from "react";
+import { useState, type ChangeEvent } from "react";
 import { useNavigate } from "react-router-dom";
+
+type Profile = {
+  name: string;
+  age: number;
+  email: string;
+  activity: string;
+};
 
 const Dashboard = () => {
   const navigate = useNavigate();
 
-  const [profile, setProfile] = useState({
+  const [profile, setProfile] = useState<Profile>({
     name: "Alex Johnson",
     age: 24,
     email: "alex@email.com",
@@ -13,11 +20,13 @@ const Dashboard = () => {
 
   const [editing, setEditing] = useState(false);
 
-  const handleChange = (e: any) => {
-    setProfile({
-      ...profile,
-      [e.target.name]: e.target.value,
-    });
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const key = e.target.name as keyof Profile;
+    const value = e.target.value;
+    setProfile((prev) => ({
+      ...prev,
+      [key]: key === "age" ? Number(value) : value,
+    }));
   };
 
   return (
@@ -192,7 +201,19 @@ export default Dashboard;
 
 /* ---------- Components ---------- */
 
-const ProfileField = ({ label, name, value, editing, onChange }: any) => (
+const ProfileField = ({
+  label,
+  name,
+  value,
+  editing,
+  onChange,
+}: {
+  label: string;
+  name: keyof Profile;
+  value: string | number;
+  editing: boolean;
+  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+}) => (
   <div>
     <p className="text-gray-400 mb-1">{label}</p>
 
@@ -210,8 +231,18 @@ const ProfileField = ({ label, name, value, editing, onChange }: any) => (
 );
 
 
-const ScoreCard = ({ title, score, color, desc }: any) => {
-  const colorMap: any = {
+const ScoreCard = ({
+  title,
+  score,
+  color,
+  desc,
+}: {
+  title: string;
+  score: number;
+  color: "green" | "orange";
+  desc: string;
+}) => {
+  const colorMap: Record<"green" | "orange", string> = {
     green: "text-green-600 border-green-200",
     orange: "text-orange-600 border-orange-200",
   };

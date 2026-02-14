@@ -249,7 +249,10 @@ const PreferenceSetup = () => {
         {/* CTA */}
         <button
           disabled={progress < 80}
-          onClick={() => navigate("/suggestions")}
+          onClick={() => {
+            localStorage.setItem("preferences", JSON.stringify(selected));
+            navigate("/suggestions");
+          }}
           className="
             mt-12
             w-full
