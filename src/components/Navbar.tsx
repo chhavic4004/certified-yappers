@@ -5,10 +5,11 @@ const Navbar = () => {
   const location = useLocation();
 
   const nav = [
+    { name: "Find Preferences", path: "/preferences" },
     { name: "Dashboard", path: "/dashboard" },
     { name: "Discover Meals", path: "/discover" },
     { name: "Your Tracker", path: "/tracker" },
-   
+    
   ];
 
   return (
