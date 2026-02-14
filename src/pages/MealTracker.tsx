@@ -464,15 +464,25 @@ const DownloadReport = ({ onDownload }: { onDownload: () => void }) => (
 );
 
 /* ---------------- SMALL COMPONENTS ---------------- */
+<<<<<<< HEAD
 const Metric = ({ title, value, desc }: { title: string; value: string | number; desc: string }) => (
   <div className="bg-white border rounded-2xl p-6 hover:shadow-md transition">
+=======
+
+const Metric = ({ title, value, desc }: any) => (
+  <div className="border rounded-2xl p-6 hover:shadow-md transition">
+>>>>>>> 6db257cb85218e004a187af17c654fb80750cac5
     <p className="text-gray-400">{title}</p>
     <h2 className="text-2xl font-bold">{value}</h2>
     <p className="text-xs text-gray-500 mt-2">{desc}</p>
   </div>
 );
 
+<<<<<<< HEAD
 const AnalysisCard = ({ title, value, desc }: { title: string; value: string | number; desc: string }) => (
+=======
+const AnalysisCard = ({ title, value, desc }: any) => (
+>>>>>>> 6db257cb85218e004a187af17c654fb80750cac5
   <div className="bg-orange-50 border border-orange-100 rounded-2xl p-5">
     <p className="text-sm text-orange-500 font-semibold">{title}</p>
     <p className="text-2xl font-bold mt-2">{value}</p>
@@ -482,14 +492,24 @@ const AnalysisCard = ({ title, value, desc }: { title: string; value: string | n
 
 const Insight = ({ text }: { text: string }) => <p className="text-gray-600">{text}</p>;
 
+<<<<<<< HEAD
 const Legend = ({ color, label }: { color: string; label: string }) => (
+=======
+const Legend = ({ color, label }: any) => (
+>>>>>>> 6db257cb85218e004a187af17c654fb80750cac5
   <div className="flex items-center gap-3">
     <div className={`w-4 h-4 rounded ${color}`} />
     {label}
   </div>
 );
 
+<<<<<<< HEAD
 const ColorBox = ({ color }: { color: string }) => <div className={`w-4 h-4 rounded ${color}`} />;
+=======
+const ColorBox = ({ color }: any) => (
+  <div className={`w-4 h-4 rounded ${color}`} />
+);
+>>>>>>> 6db257cb85218e004a187af17c654fb80750cac5
 
 const Tooltip = ({ label, score }: { label: string; score: string }) => (
   <div

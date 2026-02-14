@@ -1,5 +1,5 @@
 import Navbar from "./Navbar";
-import ChefAI from "./ChefAI";
+import ChefAIChatbot from "./ChefAIChatbot";
 import { Outlet } from "react-router-dom";
 
 const AppLayout = () => {
@@ -20,7 +20,7 @@ const AppLayout = () => {
       </div>
 
       {/* FLOATING AI */}
-      <ChefAI />
+      <ChefAIChatbot />
 
     </div>
   );
