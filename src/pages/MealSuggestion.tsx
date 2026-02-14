@@ -3,6 +3,7 @@ import MealCard from "@/components/MealCard";
 import { useEffect, useState } from "react";
 import { BACKEND_URL } from "@/services/api";
 import meal1 from "@/assets/meal-1.jpg";
+import { getFlavorPairings } from "@/services/flavorApi";
 
 type Meal = {
   name: string;
@@ -15,6 +16,15 @@ const MealSuggestion = () => {
   const [meals, setMeals] = useState<Meal[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const showFlavorInfo = async () => {
+    const data: unknown = await getFlavorPairings("chicken");
+    const pairsWith =
+      typeof data === "object" && data !== null && "pairs_with" in data
+        ? (data as { pairs_with?: unknown }).pairs_with
+        : undefined;
+    console.log(pairsWith);
+  };
 
   useEffect(() => {
     const fetchMeals = async () => {
@@ -67,6 +77,7 @@ const MealSuggestion = () => {
             };
           }),
         );
+
       } catch (err) {
         console.error("API Error", err);
         setError(err instanceof Error ? err.message : "Request failed");

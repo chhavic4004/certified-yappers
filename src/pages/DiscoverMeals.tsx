@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 
 type Meal = {
@@ -151,7 +151,7 @@ const MealCard = ({ meal }: { meal: Meal }) => (
 
 /* ---------------- SMALL STAT ---------------- */
 
-const Stat = ({ label, value }: any) => (
+const Stat = ({ label, value }: { label: string; value: ReactNode }) => (
   <div className="bg-orange-50 rounded-xl p-3">
     <p className="text-gray-400 text-xs">{label}</p>
     <p className="font-semibold">{value}</p>

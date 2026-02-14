@@ -3,6 +3,35 @@ import { useAuth } from "@/contexts/AuthContext";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import PDFReport from "@/components/PDFReport";
+import type { User } from "firebase/auth";
+
+type Preferences = {
+  diet?: string[];
+  goals?: string[];
+  cuisine?: string[];
+  health?: string[];
+  activity?: string;
+  allergies?: string;
+};
+
+type HeatmapLevel = {
+  color: string;
+  label: string;
+  score: string;
+};
+
+type CaloriesWeek = {
+  value: number;
+  date: string;
+};
+
+type MealHistoryEntry = {
+  date: string;
+  meal: string;
+  calories: number;
+  note: string;
+  tags: string[];
+};
 
 /* ---------------- COMPONENT ---------------- */
 
@@ -15,20 +44,22 @@ const MealTracker = () => {
 
   const avatarInitial = displayName.charAt(0).toUpperCase();
 
-  const [preferences, setPreferences] = useState<any | null>(null);
+  const [preferences, setPreferences] = useState<Preferences | null>(null);
 
   useEffect(() => {
     const stored = localStorage.getItem("flavourai.preferences");
     if (!stored) return;
 
     try {
-      setPreferences(JSON.parse(stored));
-    } catch {}
+      setPreferences(JSON.parse(stored) as Preferences);
+    } catch {
+      setPreferences(null);
+    }
   }, []);
 
   /* ✅ STABLE HEATMAP */
-  const heatmap = useMemo(() => {
-    const levels = [
+  const heatmap = useMemo<HeatmapLevel[]>(() => {
+    const levels: HeatmapLevel[] = [
       {
         color: "bg-green-100",
         label: "Low adherence day",
@@ -57,7 +88,7 @@ const MealTracker = () => {
   }, []);
 
   /* ✅ WEEKLY CALORIES WITH DATES */
-  const calories = [
+  const calories: CaloriesWeek[] = [
     { value: 1800, date: "Feb 3" },
     { value: 2100, date: "Feb 10" },
     { value: 1750, date: "Feb 17" },
@@ -82,7 +113,7 @@ const MealTracker = () => {
     return tags.slice(0, 10);
   }, [preferences]);
 
-  const mealHistory = [
+  const mealHistory: MealHistoryEntry[] = [
     {
       date: "Feb 12, 2026",
       meal: "Grilled Salmon Bowl",
@@ -199,7 +230,15 @@ export default MealTracker;
 
 /* ---------------- SECTIONS ---------------- */
 
-const Header = ({ user, displayName, avatarInitial }: any) => (
+const Header = ({
+  user,
+  displayName,
+  avatarInitial,
+}: {
+  user: User | null;
+  displayName: string;
+  avatarInitial: string;
+}) => (
   <div className="flex flex-wrap items-center justify-between gap-6">
     <div>
       <h1 className="text-4xl font-bold">Nutrition Intelligence</h1>
@@ -262,7 +301,7 @@ const DetailedAnalysis = () => (
 
 /* ---------------- HEATMAP ---------------- */
 
-const HeatmapSection = ({ heatmap }: any) => (
+const HeatmapSection = ({ heatmap }: { heatmap: HeatmapLevel[] }) => (
   <div className="bg-white border rounded-3xl p-8">
     <div className="grid md:grid-cols-2 gap-10">
 
@@ -281,7 +320,7 @@ const HeatmapSection = ({ heatmap }: any) => (
         </div>
 
         <div className="grid grid-rows-7 grid-flow-col gap-[5px] w-max">
-          {heatmap.map((level:any, i:number) => (
+          {heatmap.map((level, i) => (
             <div key={i} className="relative group">
               <div className={`w-4 h-4 rounded-sm ${level.color} hover:scale-125 transition`} />
 
@@ -298,7 +337,7 @@ const HeatmapSection = ({ heatmap }: any) => (
 
 /* ---------------- CALORIES ---------------- */
 
-const CaloriesSection = ({ calories }: any) => (
+const CaloriesSection = ({ calories }: { calories: CaloriesWeek[] }) => (
   <div className="bg-white border rounded-3xl p-8">
     <div className="grid md:grid-cols-2 gap-10">
 
@@ -308,7 +347,7 @@ const CaloriesSection = ({ calories }: any) => (
         </h2>
 
         <div className="flex items-end gap-6 h-52">
-          {calories.map((week:any, i:number) => (
+          {calories.map((week, i) => (
             <div key={i} className="relative group flex flex-col items-center">
 
               <div
@@ -342,14 +381,20 @@ const CaloriesSection = ({ calories }: any) => (
 
 /* ---------------- MEALS ---------------- */
 
-const PreviousMeals = ({ mealHistory, preferenceTags }: any) => (
+const PreviousMeals = ({
+  mealHistory,
+  preferenceTags,
+}: {
+  mealHistory: MealHistoryEntry[];
+  preferenceTags: string[];
+}) => (
   <div className="bg-white border rounded-3xl p-8">
     <h2 className="text-xl font-bold mb-6">
       Previous Meals & Preferences
     </h2>
 
     <div className="grid md:grid-cols-3 gap-6">
-      {mealHistory.map((entry:any) => (
+      {mealHistory.map((entry) => (
         <MealHistoryCard key={entry.date} {...entry} preferences={preferenceTags}/>
       ))}
     </div>
@@ -397,7 +442,7 @@ const AIAnalysis = () => (
 
 /* ---------------- REPORT ---------------- */
 
-const DownloadReport = ({ onDownload }: any) => (
+const DownloadReport = ({ onDownload }: { onDownload: () => void }) => (
   <div className="rounded-3xl p-10 bg-gradient-to-r from-orange-500 to-orange-600 text-white flex justify-between items-center">
     <div>
       <h2 className="text-2xl font-bold mb-2">
@@ -419,24 +464,15 @@ const DownloadReport = ({ onDownload }: any) => (
 );
 
 /* ---------------- SMALL COMPONENTS ---------------- */
-
-<<<<<<< HEAD
 const Metric = ({ title, value, desc }: { title: string; value: string | number; desc: string }) => (
   <div className="bg-white border rounded-2xl p-6 hover:shadow-md transition">
-=======
-const Metric = ({ title, value, desc }: any) => (
-  <div className="border rounded-2xl p-6 hover:shadow-md transition">
->>>>>>> c52c79ea6272fc08353e9c132f832e352a1af8ff
     <p className="text-gray-400">{title}</p>
     <h2 className="text-2xl font-bold">{value}</h2>
     <p className="text-xs text-gray-500 mt-2">{desc}</p>
   </div>
 );
 
-<<<<<<< HEAD
-const Legend = ({ color, label }: { color: string; label: string }) => (
-=======
-const AnalysisCard = ({ title, value, desc }: any) => (
+const AnalysisCard = ({ title, value, desc }: { title: string; value: string | number; desc: string }) => (
   <div className="bg-orange-50 border border-orange-100 rounded-2xl p-5">
     <p className="text-sm text-orange-500 font-semibold">{title}</p>
     <p className="text-2xl font-bold mt-2">{value}</p>
@@ -444,34 +480,27 @@ const AnalysisCard = ({ title, value, desc }: any) => (
   </div>
 );
 
-const Insight = ({ text }: any) => (
-  <p className="text-gray-600">{text}</p>
-);
+const Insight = ({ text }: { text: string }) => <p className="text-gray-600">{text}</p>;
 
-const Legend = ({ color, label }: any) => (
->>>>>>> c52c79ea6272fc08353e9c132f832e352a1af8ff
+const Legend = ({ color, label }: { color: string; label: string }) => (
   <div className="flex items-center gap-3">
     <div className={`w-4 h-4 rounded ${color}`} />
     {label}
   </div>
 );
 
-<<<<<<< HEAD
-const Insight = ({ text }: { text: string }) => (
-  <p className="text-gray-600">{text}</p>
-=======
-const ColorBox = ({ color }: any) => (
-  <div className={`w-4 h-4 rounded ${color}`} />
-);
+const ColorBox = ({ color }: { color: string }) => <div className={`w-4 h-4 rounded ${color}`} />;
 
-const Tooltip = ({ label, score }: any) => (
-  <div className="
-    absolute bottom-7 left-1/2 -translate-x-1/2
-    opacity-0 group-hover:opacity-100
-    bg-gray-900 text-white text-xs
-    px-3 py-2 rounded-lg whitespace-nowrap
-    shadow-xl transition z-50
-  ">
+const Tooltip = ({ label, score }: { label: string; score: string }) => (
+  <div
+    className="
+      absolute bottom-7 left-1/2 -translate-x-1/2
+      opacity-0 group-hover:opacity-100
+      bg-gray-900 text-white text-xs
+      px-3 py-2 rounded-lg whitespace-nowrap
+      shadow-xl transition z-50
+    "
+  >
     <p className="font-semibold">{label}</p>
     <p className="text-gray-300">{score}</p>
   </div>
@@ -479,37 +508,53 @@ const Tooltip = ({ label, score }: any) => (
 
 const AIBox = () => (
   <div className="bg-green-50 border border-green-200 rounded-2xl p-6 space-y-3">
-    <h3 className="font-bold text-green-700">
-      🤖 AI Consistency Insight
-    </h3>
+    <h3 className="font-bold text-green-700">🤖 AI Consistency Insight</h3>
 
-    <p className="text-gray-700">
-      Strong weekday discipline with minor weekend variation.
+    <p className="text-gray-700">Strong weekday discipline with minor weekend variation.</p>
+
+    <p className="text-sm">
+      🔥 Consistency Score: <b>89%</b>
     </p>
-
-    <p className="text-sm">🔥 Consistency Score: <b>89%</b></p>
-    <p className="text-sm">📈 Health score may improve by <b>6–9%</b>.</p>
+    <p className="text-sm">
+      📈 Health score may improve by <b>6–9%</b>.
+    </p>
     <p className="text-sm">⚡ Logging meals early boosts AI accuracy.</p>
   </div>
 );
 
 const CaloriesAI = () => (
   <div className="bg-orange-50 border border-orange-200 rounded-2xl p-6">
-    <h3 className="font-bold text-orange-700">
-      🔥 AI Calorie Analysis
-    </h3>
+    <h3 className="font-bold text-orange-700">🔥 AI Calorie Analysis</h3>
 
-    <p className="text-gray-700 mt-2">
-      Controlled fluctuation — a hallmark of flexible dieting.
+    <p className="text-gray-700 mt-2">Controlled fluctuation — a hallmark of flexible dieting.</p>
+
+    <p className="text-sm mt-3">
+      📊 Avg Intake: <b>1,920 kcal</b>
     </p>
-
-    <p className="text-sm mt-3">📊 Avg Intake: <b>1,920 kcal</b></p>
-    <p className="text-sm">⚖️ Variability: <b>Low</b></p>
-    <p className="text-sm">🚀 Efficiency may improve by <b>5–8%</b>.</p>
+    <p className="text-sm">
+      ⚖️ Variability: <b>Low</b>
+    </p>
+    <p className="text-sm">
+      🚀 Efficiency may improve by <b>5–8%</b>.
+    </p>
   </div>
 );
 
-const MealHistoryCard = ({ date, meal, calories, note, tags, preferences }: any) => (
+const MealHistoryCard = ({
+  date,
+  meal,
+  calories,
+  note,
+  tags,
+  preferences,
+}: {
+  date: string;
+  meal: string;
+  calories: string | number;
+  note: string;
+  tags: string[];
+  preferences: string[];
+}) => (
   <div className="border rounded-2xl p-5 hover:shadow-md transition">
     <div className="flex justify-between">
       <p className="text-sm text-gray-400 font-medium">📅 {date}</p>
@@ -520,7 +565,7 @@ const MealHistoryCard = ({ date, meal, calories, note, tags, preferences }: any)
     <p className="text-sm text-gray-500">{note}</p>
 
     <div className="flex flex-wrap gap-2 mt-4">
-      {tags.map((tag:string) => (
+      {tags.map((tag) => (
         <span key={tag} className="text-xs px-3 py-1 bg-orange-100 text-orange-600 rounded-full font-semibold">
           {tag}
         </span>
@@ -531,15 +576,16 @@ const MealHistoryCard = ({ date, meal, calories, note, tags, preferences }: any)
       <p className="text-xs text-gray-400 mb-2">Preferences at the time</p>
 
       <div className="flex flex-wrap gap-2">
-        {preferences.length
-          ? preferences.map((pref:string) => (
-              <span key={pref} className="text-xs px-3 py-1 bg-gray-100 text-gray-600 rounded-full">
-                {pref}
-              </span>
-            ))
-          : <span className="text-xs text-gray-400">No preferences saved.</span>}
+        {preferences.length ? (
+          preferences.map((pref) => (
+            <span key={pref} className="text-xs px-3 py-1 bg-gray-100 text-gray-600 rounded-full">
+              {pref}
+            </span>
+          ))
+        ) : (
+          <span className="text-xs text-gray-400">No preferences saved.</span>
+        )}
       </div>
     </div>
   </div>
->>>>>>> c52c79ea6272fc08353e9c132f832e352a1af8ff
 );
