@@ -16,7 +16,7 @@ services:
     # Health check for zero-downtime deploys
     healthCheckPath: /
 
-    # Free tier - upgrade to starter if you need more reliability
+    # Use free tier; remove this line if you need starter
     plan: free
 
     # Optional: add GROQ_API_KEY or OPENAI_API_KEY in Render Dashboard for LLM meal fallback
