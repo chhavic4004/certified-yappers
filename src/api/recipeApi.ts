@@ -1,44 +1,61 @@
 import axios from "axios";
+import { BACKEND_URL } from "@/services/api";
 
-const BASE_URL = "http://cosylab.iiitd.edu.in:6969";
-const API_KEY = "Bearer EakuMCplIpn3LWZuhhD9hN5PPZo4xaQ_EOAlgLS3bU8Fez7_";
-
-const headers = {
-  Authorization: API_KEY,
-  "Content-Type": "application/json",
-};
+// 🔥 MAIN: Get meals based on preferences
+export const getMealSuggestions = (preferences: {
+  cuisine?: string;
+  diet?: string;
+  caloriesMin?: number;
+  caloriesMax?: number;
+  proteinMin?: number;
+  proteinMax?: number;
+  goals?: string[];
+  health?: string[];
+  allergies?: string[];
+}) =>
+  axios.post(`${BACKEND_URL}/api/meals`, preferences);
 
 // 1️⃣ Cuisine
-export const getRecipesByCuisine = (region: string, page = 1) =>
+export const getRecipesByCuisine = (region: string) =>
   axios.get(
-    `${BASE_URL}/recipe2-api/recipes_cuisine/cuisine/${region}`,
-    { params: { page, page_size: 10 }, headers }
+    `${BACKEND_URL}/api/recipes/cuisine/${encodeURIComponent(region)}`
   );
 
-// 2️⃣ Diet
-export const getRecipesByDiet = (diet: string) =>
+// 2️⃣ Diet + Region
+export const getRecipesByDiet = (diet: string, region?: string) =>
   axios.get(
-    `${BASE_URL}/recipe2-api/recipes_diet/${diet}`,
-    { headers }
+    `${BACKEND_URL}/api/recipes/diet/${encodeURIComponent(diet)}`,
+    { params: region ? { region } : {} }
   );
 
-// 3️⃣ Calories
-export const getRecipesByCalories = (min: number, max: number) =>
+// 3️⃣ Search by Title
+export const getRecipesByTitle = (title: string) =>
   axios.get(
-    `${BASE_URL}/recipe2-api/recipes_calories`,
-    { params: { min, max }, headers }
+    `${BACKEND_URL}/api/recipes/title`,
+    { params: { title } }
   );
 
-// 4️⃣ Protein
-export const getRecipesByProtein = (min: number, max: number) =>
+// 4️⃣ Recipe Instructions
+export const getRecipeInstructions = (recipeId: string) =>
   axios.get(
-    `${BASE_URL}/recipe2-api/recipes_protein`,
-    { params: { min, max }, headers }
+    `${BACKEND_URL}/api/recipes/instructions/${encodeURIComponent(recipeId)}`
   );
 
-// 5️⃣ Nutrition
-export const getNutritionInfo = (id: string) =>
+// 5️⃣ Recipe of the Day
+export const getRecipeOfDay = () =>
+  axios.get(`${BACKEND_URL}/api/recipes/recipeofday`);
+
+// 6️⃣ Recipe of the Day with Exclusions
+export const getRecipeOfDayWithExclusions = (
+  excludeIngredients?: string[],
+  excludeCategories?: string[]
+) =>
   axios.get(
-    `${BASE_URL}/recipe2-api/recipe/nutrition/${id}`,
-    { headers }
+    `${BACKEND_URL}/api/recipes/recipeofday/with-ingredients-categories`,
+    { 
+      params: {
+        excludeIngredients: excludeIngredients?.join(","),
+        excludeCategories: excludeCategories?.join(","),
+      }
+    }
   );
