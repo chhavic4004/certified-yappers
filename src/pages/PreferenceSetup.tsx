@@ -55,6 +55,10 @@ const PreferenceSetup = () => {
     allergies: "",
     activity: "",
     age: "",
+    caloriesMin: "",
+    caloriesMax: "",
+    proteinMin: "",
+    proteinMax: "",
   });
 
   /* ---------- TOGGLE ---------- */
@@ -261,6 +265,45 @@ const PreferenceSetup = () => {
             }
           />
 
+        </div>
+
+        <div className="grid md:grid-cols-4 gap-6 mt-6">
+          <input
+            type="number"
+            min={0}
+            placeholder="Min Calories"
+            className="p-4 border rounded-xl"
+            onChange={(e) =>
+              setSelected({ ...selected, caloriesMin: e.target.value })
+            }
+          />
+          <input
+            type="number"
+            min={0}
+            placeholder="Max Calories"
+            className="p-4 border rounded-xl"
+            onChange={(e) =>
+              setSelected({ ...selected, caloriesMax: e.target.value })
+            }
+          />
+          <input
+            type="number"
+            min={0}
+            placeholder="Min Protein (g)"
+            className="p-4 border rounded-xl"
+            onChange={(e) =>
+              setSelected({ ...selected, proteinMin: e.target.value })
+            }
+          />
+          <input
+            type="number"
+            min={0}
+            placeholder="Max Protein (g)"
+            className="p-4 border rounded-xl"
+            onChange={(e) =>
+              setSelected({ ...selected, proteinMax: e.target.value })
+            }
+          />
         </div>
 
         {/* CTA */}

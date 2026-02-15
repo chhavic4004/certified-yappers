@@ -1,5 +1,11 @@
 node_modules
 .env
+<<<<<<< HEAD
 .env.local
 .DS_Store
 *.log
+=======
+*.log
+.DS_Store
+.vercel
+>>>>>>> origin/main

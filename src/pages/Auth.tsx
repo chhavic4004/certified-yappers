@@ -16,12 +16,16 @@ const Auth = () => {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
   const redirectTo = location.state?.from?.pathname || "/dashboard";
 
   const handleAuth = async () => {
+    if (loading) return; // Prevent multiple clicks
+    
+    setLoading(true);
     try {
       if (isLogin) {
         await signInWithEmailAndPassword(auth, email, password);
@@ -43,20 +47,50 @@ const Auth = () => {
           ? String((error as { message?: unknown }).message ?? "")
           : "";
       alert(message || "Authentication failed. Please try again.");
+<<<<<<< HEAD
+=======
+    } finally {
+      setLoading(false);
+>>>>>>> origin/main
     }
   };
 
   const handleGoogleAuth = async () => {
+    if (loading) return; // Prevent multiple clicks
+    
+    setLoading(true);
     try {
       const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({
+        prompt: 'select_account'
+      });
       await signInWithPopup(auth, provider);
       navigate(redirectTo, { replace: true });
     } catch (error: unknown) {
+<<<<<<< HEAD
+=======
+      // Ignore cancelled popup errors (user closed popup or clicked again)
+      const errorCode = 
+        typeof error === "object" && error !== null && "code" in error
+          ? String((error as { code?: unknown }).code ?? "")
+          : "";
+      
+      if (errorCode === "auth/cancelled-popup-request" || errorCode === "auth/popup-closed-by-user") {
+        // User closed the popup or clicked again, just return without alert
+        return;
+      }
+      
+>>>>>>> origin/main
       const message =
         typeof error === "object" && error !== null && "message" in error
           ? String((error as { message?: unknown }).message ?? "")
           : "";
       alert(message || "Google sign-in failed. Please try again.");
+<<<<<<< HEAD
+=======
+    } finally {
+      setLoading(false);
+>>>>>>> origin/main
     }
   };
 
@@ -166,6 +200,7 @@ const Auth = () => {
               {/* CTA BUTTON */}
               <button
                 onClick={handleAuth}
+                disabled={loading}
                 className="
                   w-full
                   bg-gradient-to-r
@@ -179,14 +214,18 @@ const Auth = () => {
                   shadow-lg
                   transition
                   hover:scale-[1.02]
+                  disabled:opacity-50
+                  disabled:cursor-not-allowed
+                  disabled:hover:scale-100
                 "
               >
-                {isLogin ? "Login" : "Sign Up"}
+                {loading ? "Loading..." : (isLogin ? "Login" : "Sign Up")}
               </button>
 
               {/* GOOGLE */}
               <button
                 onClick={handleGoogleAuth}
+                disabled={loading}
                 className="
                   w-full
                   py-3
@@ -195,9 +234,11 @@ const Auth = () => {
                   rounded-xl
                   hover:bg-gray-50
                   transition
+                  disabled:opacity-50
+                  disabled:cursor-not-allowed
                 "
               >
-                Continue with Google
+                {loading ? "Loading..." : "Continue with Google"}
               </button>
             </div>
 
@@ -208,7 +249,10 @@ const Auth = () => {
                 : "Already have an account?"}
 
               <button
-                onClick={() => setIsLogin(!isLogin)}
+                onClick={() => {
+                  setIsLogin(!isLogin);
+                  setLoading(false);
+                }}
                 className="ml-2 text-orange-500 font-semibold hover:underline"
               >
                 {isLogin ? "Sign Up" : "Login"}

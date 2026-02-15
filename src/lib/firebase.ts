@@ -1,4 +1,4 @@
-import { initializeApp } from "firebase/app";
+import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAnalytics, isSupported } from "firebase/analytics";
 import { getAuth } from "firebase/auth";
 
@@ -12,7 +12,8 @@ const firebaseConfig = {
   measurementId: "G-7RF59TXB98",
 };
 
-const app = initializeApp(firebaseConfig);
+// Check if Firebase app is already initialized to prevent duplicate initialization errors
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
 const auth = getAuth(app);
 

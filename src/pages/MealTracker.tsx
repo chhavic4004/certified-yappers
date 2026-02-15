@@ -45,7 +45,12 @@ const MealTracker = () => {
   const avatarInitial = displayName.charAt(0).toUpperCase();
 
   const [preferences, setPreferences] = useState<Preferences | null>(null);
+<<<<<<< HEAD
+=======
+  const [mealHistory, setMealHistory] = useState<MealHistoryEntry[]>([]);
+>>>>>>> origin/main
 
+  // Load preferences
   useEffect(() => {
     const stored = localStorage.getItem("flavourai.preferences");
     if (!stored) return;
@@ -57,6 +62,70 @@ const MealTracker = () => {
     }
   }, []);
 
+<<<<<<< HEAD
+=======
+  // Load saved meals
+  useEffect(() => {
+    const savedMeals = localStorage.getItem("flavourai.savedMeals");
+    if (savedMeals) {
+      try {
+        const meals = JSON.parse(savedMeals) as MealHistoryEntry[];
+        setMealHistory(meals);
+      } catch {
+        // If parsing fails, use default meals
+        setMealHistory([
+          {
+            date: "Feb 12, 2026",
+            meal: "Grilled Salmon Bowl",
+            calories: 420,
+            note: "Post-workout recovery",
+            tags: ["High Protein", "Omega-3", "Low Sugar"],
+          },
+          {
+            date: "Feb 10, 2026",
+            meal: "Mediterranean Salad",
+            calories: 350,
+            note: "Light dinner",
+            tags: ["Low Carb", "Fresh Ingredients", "Anti-Inflammatory"],
+          },
+          {
+            date: "Feb 08, 2026",
+            meal: "Buddha Power Bowl",
+            calories: 380,
+            note: "High fiber lunch",
+            tags: ["Plant Protein", "Gut Friendly", "High Fiber"],
+          },
+        ]);
+      }
+    } else {
+      // Default meals if nothing saved
+      setMealHistory([
+        {
+          date: "Feb 12, 2026",
+          meal: "Grilled Salmon Bowl",
+          calories: 420,
+          note: "Post-workout recovery",
+          tags: ["High Protein", "Omega-3", "Low Sugar"],
+        },
+        {
+          date: "Feb 10, 2026",
+          meal: "Mediterranean Salad",
+          calories: 350,
+          note: "Light dinner",
+          tags: ["Low Carb", "Fresh Ingredients", "Anti-Inflammatory"],
+        },
+        {
+          date: "Feb 08, 2026",
+          meal: "Buddha Power Bowl",
+          calories: 380,
+          note: "High fiber lunch",
+          tags: ["Plant Protein", "Gut Friendly", "High Fiber"],
+        },
+      ]);
+    }
+  }, []);
+
+>>>>>>> origin/main
   /* ✅ STABLE HEATMAP */
   const heatmap = useMemo<HeatmapLevel[]>(() => {
     const levels: HeatmapLevel[] = [
@@ -113,6 +182,7 @@ const MealTracker = () => {
     return tags.slice(0, 10);
   }, [preferences]);
 
+<<<<<<< HEAD
   const mealHistory: MealHistoryEntry[] = [
     {
       date: "Feb 12, 2026",
@@ -140,6 +210,11 @@ const MealTracker = () => {
   const handleDownloadPDF = async () => {
     if (!pdfRef.current) return;
 
+=======
+  const handleDownloadPDF = async () => {
+    if (!pdfRef.current) return;
+
+>>>>>>> origin/main
     try {
       const canvas = await html2canvas(pdfRef.current, {
         scale: 2,
@@ -389,6 +464,7 @@ const PreviousMeals = ({
   preferenceTags: string[];
 }) => (
   <div className="bg-white border rounded-3xl p-8">
+<<<<<<< HEAD
     <h2 className="text-xl font-bold mb-6">
       Previous Meals & Preferences
     </h2>
@@ -398,6 +474,32 @@ const PreviousMeals = ({
         <MealHistoryCard key={entry.date} {...entry} preferences={preferenceTags}/>
       ))}
     </div>
+=======
+    <div className="flex items-center justify-between mb-6">
+      <h2 className="text-xl font-bold">
+        Previous Meals & Preferences
+      </h2>
+      <span className="text-sm px-3 py-1 bg-orange-100 text-orange-600 rounded-full font-semibold">
+        {mealHistory.length} {mealHistory.length === 1 ? "meal" : "meals"}
+      </span>
+    </div>
+
+    {mealHistory.length > 0 ? (
+      <div className="grid md:grid-cols-3 gap-6">
+        {mealHistory.map((entry, index) => (
+          <MealHistoryCard key={`${entry.date}-${index}`} {...entry} preferences={preferenceTags}/>
+        ))}
+      </div>
+    ) : (
+      <div className="text-center py-12 bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl">
+        <div className="text-6xl mb-4">🍽️</div>
+        <p className="text-gray-600 font-semibold mb-2">No meals tracked yet</p>
+        <p className="text-gray-500 text-sm">
+          Add meals from the Discover Meals or Meal Suggestions pages
+        </p>
+      </div>
+    )}
+>>>>>>> origin/main
   </div>
 );
 
