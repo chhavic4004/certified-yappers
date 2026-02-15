@@ -4,9 +4,18 @@ interface Props {
   calories: number | string;
   protein: number | string;
   reason?: string[];
+  ingredients?: string[] | string;
+  recipe?: string;
 }
 
-const MealCard = ({ image, name, calories, protein }: Props) => {
+const MealCard = ({ image, name, calories, protein, ingredients }: Props) => {
+  // Parse ingredients if it's a string
+  const ingredientList = Array.isArray(ingredients)
+    ? ingredients
+    : typeof ingredients === "string"
+    ? ingredients.split(",").map((i) => i.trim())
+    : [];
+
   return (
     <div className="group cursor-pointer">
 
@@ -19,6 +28,16 @@ const MealCard = ({ image, name, calories, protein }: Props) => {
       <p className="text-sm text-gray-500 text-center">
         🔥 {calories} cal • 💪 {protein}g
       </p>
+
+      {/* Ingredients */}
+      {ingredientList.length > 0 && (
+        <div className="mt-2 text-center">
+          <p className="text-xs text-gray-600 font-medium">
+            {ingredientList.slice(0, 3).join(", ")}
+            {ingredientList.length > 3 && "..."}
+          </p>
+        </div>
+      )}
 
       {/* Hover */}
       <button className="opacity-0 group-hover:opacity-100 transition mt-3 w-full bg-orange-500 text-white py-2 rounded-xl">

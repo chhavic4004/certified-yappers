@@ -261,7 +261,7 @@ const PreferenceSetup = () => {
         {/* CTA */}
         <button
           disabled={progress < 80}
-          onClick={() => navigate("/suggestions")}
+          onClick={handleGenerate}
           className="
             mt-12
             w-full

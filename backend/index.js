@@ -22,6 +22,7 @@ const API_KEY = "EakuMCplIpn3LWZuhhD9hN5PPZo4xaQ_EOAlgLS3bU8Fez7_";
 app.post("/api/meals", async (req, res) => {
   try {
     const { cuisine, diet, caloriesMin, caloriesMax, proteinMin, proteinMax, goals } = req.body;
+    console.log("📥 INCOMING REQUEST:", { cuisine, diet, caloriesMin, caloriesMax, proteinMin, proteinMax, goals });
     function inferFromGoals(gs, calMin, calMax, protMin, protMax) {
       let a = calMin, b = calMax, c = protMin, d = protMax;
       if (Array.isArray(gs) && gs.length) {
@@ -128,7 +129,7 @@ app.post("/api/meals", async (req, res) => {
         `Diet: ${diet || "any"}`,
         `Calories: ${caloriesMin ?? ""}-${caloriesMax ?? ""}`,
         `Protein: ${proteinMin ?? ""}-${proteinMax ?? ""}`,
-        `Return 10 meals strictly as JSON with shape {"meals":[{"name":string,"calories":number|null,"protein":number|null,"region":string}]}. No extra text.`,
+        `Return 10 meals strictly as JSON with shape {"meals":[{"name":string,"calories":number|null,"protein":number|null,"region":string,"ingredients":["item1","item2"],"recipe":string}]}. No extra text.`,
       ].join("\n");
       const r = await fetch(url, {
         method: "POST",
@@ -165,6 +166,8 @@ app.post("/api/meals", async (req, res) => {
             calories: x.calories == null ? null : Number(x.calories),
             protein: x.protein == null ? null : Number(x.protein),
             region: String(x.region || cuisine || "Unknown"),
+            ingredients: Array.isArray(x.ingredients) ? x.ingredients : typeof x.ingredients === "string" ? x.ingredients.split(",").map(i => i.trim()) : [],
+            recipe: String(x.recipe || ""),
           }))
           .slice(0, 12);
       } catch {
@@ -269,9 +272,43 @@ app.post("/api/meals", async (req, res) => {
       calories: r?.calories ?? null,
       protein: r?.protein ?? null,
       region: r?.Region ?? r?.region ?? cuisine ?? null,
+      ingredients: r?.Ingredients ?? r?.ingredients ?? r?.Items ?? r?.items ?? [],
+      recipe: r?.Instructions ?? r?.instructions ?? r?.Recipe ?? r?.recipe ?? null,
     }));
 
-    if (meals.length === 0) {
+    // Fetch full details (ingredients, instructions) for each meal
+    let mealsWithDetails = await Promise.all(
+      meals.map(async (meal) => {
+        if (!meal.id) return meal; // Skip if no ID
+        
+        try {
+          const url = `${BASE_URL}/recipe2-api/recipe/nutrition/${encodeURIComponent(meal.id)}`;
+          const resp = await fetch(url, {
+            headers: {
+              Authorization: `Bearer ${API_KEY}`,
+              "Content-Type": "application/json",
+            },
+          });
+          
+          if (!resp.ok) return meal; // Return original if fetch fails
+          
+          const detail = await resp.json();
+          const detailObj = detail?.data || detail || {};
+          
+          // Extract ingredients and recipe from detail
+          return {
+            ...meal,
+            ingredients: detailObj?.Ingredients || detailObj?.ingredients || detailObj?.Items || detailObj?.items || meal.ingredients || [],
+            recipe: detailObj?.Instructions || detailObj?.instructions || detailObj?.Recipe || detailObj?.recipe || detailObj?.method || meal.recipe || null,
+          };
+        } catch (err) {
+          return meal; // Return original on error
+        }
+      })
+    );
+
+    // If no meals found, try LLM
+    if (mealsWithDetails.length === 0) {
       const llmMeals = await generateMealsWithLLM({
         cuisine,
         diet,
@@ -285,7 +322,7 @@ app.post("/api/meals", async (req, res) => {
       }
     }
 
-    res.json({ meals });
+    return res.json({ meals: mealsWithDetails });
   
   } catch (err) {
     console.error(err);

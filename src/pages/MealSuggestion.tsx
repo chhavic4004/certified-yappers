@@ -8,6 +8,8 @@ type Meal = {
   name: string;
   calories: number;
   protein: number;
+  ingredients?: string[] | string;
+  recipe?: string;
 };
 
 const MealSuggestion = () => {
@@ -21,13 +23,31 @@ const MealSuggestion = () => {
       setLoading(true);
       setError(null);
       try {
-        const prefs = JSON.parse(localStorage.getItem("preferences") || "{}");
+        const prefs = JSON.parse(localStorage.getItem("flavourai.preferences") || "{}");
 
-        // Build request body from preferences
+        // Infer calorie & protein ranges from goals
+        let caloriesMin = null, caloriesMax = null, proteinMin = null, proteinMax = null;
+        
+        if (Array.isArray(prefs.goals)) {
+          if (prefs.goals.includes("Lose Weight")) {
+            caloriesMin = 200;
+            caloriesMax = 450;
+          }
+          if (prefs.goals.includes("Gain Muscle")) {
+            proteinMin = 25;
+            proteinMax = 45;
+          }
+        }
+
+        // Build request body from preferences with ALL parameters
         const reqBody = {
           cuisine: prefs.cuisine?.[0] || "Indian",
           diet: prefs.diet?.[0],
           goals: prefs.goals,
+          caloriesMin,
+          caloriesMax,
+          proteinMin,
+          proteinMax,
         };
 
         console.log("Sending meal request to backend:", reqBody);
@@ -60,11 +80,17 @@ const MealSuggestion = () => {
             const nameRaw = obj.name ?? obj.title;
             const caloriesRaw = obj.calories;
             const proteinRaw = obj.protein;
-            return {
+            const ingredientsRaw = obj.ingredients;
+            const recipeRaw = obj.recipe;
+            const meal = {
               name: typeof nameRaw === "string" && nameRaw.trim() ? nameRaw : "Untitled",
               calories: Number.isFinite(Number(caloriesRaw)) ? Number(caloriesRaw) : 0,
               protein: Number.isFinite(Number(proteinRaw)) ? Number(proteinRaw) : 0,
+              ingredients: ingredientsRaw,
+              recipe: recipeRaw,
             };
+            console.log("🍽️ MAPPED MEAL:", meal);
+            return meal;
           }),
         );
       } catch (err) {
@@ -164,6 +190,8 @@ const MealSuggestion = () => {
                     name={meal.name}
                     calories={meal.calories}
                     protein={meal.protein}
+                    ingredients={meal.ingredients}
+                    recipe={meal.recipe}
                     reason={reason}
                   />
 
@@ -179,16 +207,45 @@ const MealSuggestion = () => {
                       transition
                       p-5
                       flex flex-col justify-between
+                      overflow-y-auto
+                      max-h-80
                     "
                   >
                     <div>
                       <h3 className="font-bold text-lg mb-2">
-                        AI Recommendation
+                        {meal.name}
                       </h3>
 
-                      <p className="text-gray-600 text-sm mb-4">
-                        Optimized for your health profile and flavor compatibility.
+                      <p className="text-gray-600 text-sm mb-3">
+                        🔥 {meal.calories} cal • 💪 {meal.protein}g protein
                       </p>
+
+                      {/* INGREDIENTS */}
+                      {Array.isArray(meal.ingredients) && meal.ingredients.length > 0 && (
+                        <div className="mb-3">
+                          <p className="font-semibold text-sm text-orange-600 mb-2">📦 Ingredients:</p>
+                          <div className="flex flex-wrap gap-2">
+                            {meal.ingredients.map((ing, idx) => (
+                              <span
+                                key={idx}
+                                className="text-xs px-2 py-1 bg-orange-100 text-orange-700 rounded-full"
+                              >
+                                {ing}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* RECIPE */}
+                      {meal.recipe && (
+                        <div className="mb-3">
+                          <p className="font-semibold text-sm text-orange-600 mb-2">👨‍🍳 Recipe:</p>
+                          <p className="text-xs text-gray-600 line-clamp-4">
+                            {meal.recipe}
+                          </p>
+                        </div>
+                      )}
 
                       {/* TAGS */}
                       <div className="flex flex-wrap gap-2">
