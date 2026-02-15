@@ -37,8 +37,12 @@ const Auth = () => {
       const displayName = fullName.trim() || email.split("@")[0];
       await updateProfile(credential.user, { displayName });
       navigate("/preferences", { replace: true });
-    } catch (error: any) {
-      alert(error?.message || "Authentication failed. Please try again.");
+    } catch (error: unknown) {
+      const message =
+        typeof error === "object" && error !== null && "message" in error
+          ? String((error as { message?: unknown }).message ?? "")
+          : "";
+      alert(message || "Authentication failed. Please try again.");
     }
   };
 
@@ -47,8 +51,12 @@ const Auth = () => {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
       navigate(redirectTo, { replace: true });
-    } catch (error: any) {
-      alert(error?.message || "Google sign-in failed. Please try again.");
+    } catch (error: unknown) {
+      const message =
+        typeof error === "object" && error !== null && "message" in error
+          ? String((error as { message?: unknown }).message ?? "")
+          : "";
+      alert(message || "Google sign-in failed. Please try again.");
     }
   };
 

@@ -1,4 +1,4 @@
-import { useEffect, useState, type ChangeEvent } from "react";
+import { useEffect, useState, type ChangeEvent, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
@@ -10,6 +10,8 @@ type Profile = {
   email: string;
   activity: string;
 };
+
+type ScoreColor = "green" | "orange";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -397,14 +399,24 @@ export default Dashboard;
 
 /* COMPONENTS */
 
-const ProfileField = ({ label, value }: any) => (
+const ProfileField = ({ label, value }: { label: string; value: string | number }) => (
   <div>
     <p className="text-gray-400 mb-1">{label}</p>
     <p className="font-semibold text-lg break-words">{value}</p>
   </div>
 );
 
-const InputField = ({label,name,value,onChange}:any)=>(
+const InputField = ({
+  label,
+  name,
+  value,
+  onChange,
+}: {
+  label: string;
+  name: keyof Profile;
+  value: string | number;
+  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+}) => (
   <div>
     <p className="text-gray-400 mb-1">{label}</p>
     <input
@@ -416,8 +428,20 @@ const InputField = ({label,name,value,onChange}:any)=>(
   </div>
 );
 
-const ScoreCard = ({ title, score, color, desc, onClick }: any) => {
-  const colorMap: any = {
+const ScoreCard = ({
+  title,
+  score,
+  color,
+  desc,
+  onClick,
+}: {
+  title: string;
+  score: number;
+  color: ScoreColor;
+  desc: string;
+  onClick: () => void;
+}) => {
+  const colorMap: Record<ScoreColor, string> = {
     green: "text-green-600 border-green-200",
     orange: "text-orange-600 border-orange-200",
   };
@@ -441,7 +465,15 @@ const ScoreCard = ({ title, score, color, desc, onClick }: any) => {
   );
 };
 
-const Popup = ({ title, children, onClose }: any) => (
+const Popup = ({
+  title,
+  children,
+  onClose,
+}: {
+  title: string;
+  children: ReactNode;
+  onClose: () => void;
+}) => (
   <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
     <div className="bg-white rounded-3xl p-10 max-w-3xl w-full max-h-[90vh] overflow-y-auto relative shadow-2xl">
 
@@ -458,8 +490,11 @@ const Popup = ({ title, children, onClose }: any) => (
   </div>
 );
 
-const ScoreRing = ({ score, color }: any) => {
-  const colorClass = color === "green" ? "text-green-600 border-green-200" : "text-orange-600 border-orange-200";
+const ScoreRing = ({ score, color }: { score: number; color: ScoreColor }) => {
+  const colorClass =
+    color === "green"
+      ? "text-green-600 border-green-200"
+      : "text-orange-600 border-orange-200";
   return (
     <div className={`w-32 h-32 mx-auto rounded-full border-[8px] flex items-center justify-center text-3xl font-bold mb-6 ${colorClass}`}>
       {score}
@@ -467,20 +502,30 @@ const ScoreRing = ({ score, color }: any) => {
   );
 };
 
-const MetricsGrid = ({ children }: any) => (
+const MetricsGrid = ({ children }: { children: ReactNode }) => (
   <div className="grid grid-cols-2 gap-4 mb-6">
     {children}
   </div>
 );
 
-const Metric = ({ label, value, color, detail }: any) => {
+const Metric = ({
+  label,
+  value,
+  color,
+  detail,
+}: {
+  label: string;
+  value: string;
+  color: ScoreColor;
+  detail: string;
+}) => {
   const borderClass =
     color === "green"
       ? "border-green-200 bg-green-50"
       : "border-orange-200 bg-orange-50";
 
   return (
-    <div className={`border rounded-2xl p-4`}>
+    <div className={`border rounded-2xl p-4 ${borderClass}`}>
       <p className="text-sm text-gray-500 mb-1">{label}</p>
 
       <p className={`font-semibold text-lg mb-1`}>
@@ -495,8 +540,11 @@ const Metric = ({ label, value, color, detail }: any) => {
 };
 
 
-const AIBox = ({ color, children }: any) => {
-  const bgClass = color === "green" ? "bg-green-50 border-green-200" : "bg-orange-50 border-orange-200";
+const AIBox = ({ color, children }: { color: ScoreColor; children: ReactNode }) => {
+  const bgClass =
+    color === "green"
+      ? "bg-green-50 border-green-200"
+      : "bg-orange-50 border-orange-200";
   return (
     <div className={`border rounded-2xl p-4 ${bgClass}`}>
       <p className="text-sm text-gray-700">{children}</p>
@@ -504,7 +552,7 @@ const AIBox = ({ color, children }: any) => {
   );
 };
 
-const DetailRow = ({ label, value }: any) => (
+const DetailRow = ({ label, value }: { label: string; value: string }) => (
   <div className="flex justify-between py-3 border-b border-gray-200">
     <p className="text-gray-500">{label}</p>
     <p className="font-semibold text-gray-800">{value}</p>
