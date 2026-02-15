@@ -15,8 +15,14 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const BASE_URL = "http://cosylab.iiitd.edu.in:6969";
-const API_KEY = "EakuMCplIpn3LWZuhhD9hN5PPZo4xaQ_EOAlgLS3bU8Fez7_";
+const BASE_URL = process.env.RECIPE_DB_BASE_URL || "http://cosylab.iiitd.edu.in:6969";
+const FLAVOR_DB_BASE_URL = process.env.FLAVOR_DB_BASE_URL || `${BASE_URL}/flavordb`;
+const API_KEY = process.env.RECIPE_DB_API_KEY || "EakuMCplIpn3LWZuhhD9hN5PPZo4xaQ_EOAlgLS3bU8Fez7_";
+
+const fetchHeaders = {
+  Authorization: `Bearer ${API_KEY}`,
+  "Content-Type": "application/json",
+};
 
 // 🔥 MAIN ENDPOINT
 app.post("/api/meals", async (req, res) => {
@@ -329,6 +335,87 @@ app.post("/api/meals", async (req, res) => {
     res.status(500).json({ error: "RecipeDB failed" });
   }
 });
+// 🍽️ RECIPE DB PROXY (for frontend direct recipe API calls)
+app.get("/api/recipe/cuisine/:region", async (req, res) => {
+  try {
+    const { region } = req.params;
+    const { page = 1, page_size = 10 } = req.query;
+    const url = `${BASE_URL}/recipe2-api/recipes_cuisine/cuisine/${encodeURIComponent(region)}?page=${page}&page_size=${page_size}`;
+    const r = await fetch(url, { headers: fetchHeaders });
+    const data = await r.json();
+    res.json(data);
+  } catch (err) {
+    console.error("Recipe DB cuisine error:", err);
+    res.status(500).json({ error: "Recipe DB failed" });
+  }
+});
+app.get("/api/recipe/diet/:diet", async (req, res) => {
+  try {
+    const url = `${BASE_URL}/recipe2-api/recipes_diet/${encodeURIComponent(req.params.diet)}`;
+    const r = await fetch(url, { headers: fetchHeaders });
+    res.json(await r.json());
+  } catch (err) {
+    console.error("Recipe DB diet error:", err);
+    res.status(500).json({ error: "Recipe DB failed" });
+  }
+});
+app.get("/api/recipe/calories", async (req, res) => {
+  try {
+    const { min, max } = req.query;
+    const url = `${BASE_URL}/recipe2-api/recipes_calories?min=${encodeURIComponent(min ?? "")}&max=${encodeURIComponent(max ?? "")}`;
+    const r = await fetch(url, { headers: fetchHeaders });
+    res.json(await r.json());
+  } catch (err) {
+    console.error("Recipe DB calories error:", err);
+    res.status(500).json({ error: "Recipe DB failed" });
+  }
+});
+app.get("/api/recipe/protein", async (req, res) => {
+  try {
+    const { min, max } = req.query;
+    const url = `${BASE_URL}/recipe2-api/recipes_protein?min=${encodeURIComponent(min ?? "")}&max=${encodeURIComponent(max ?? "")}`;
+    const r = await fetch(url, { headers: fetchHeaders });
+    res.json(await r.json());
+  } catch (err) {
+    console.error("Recipe DB protein error:", err);
+    res.status(500).json({ error: "Recipe DB failed" });
+  }
+});
+app.get("/api/recipe/nutrition/:id", async (req, res) => {
+  try {
+    const url = `${BASE_URL}/recipe2-api/recipe/nutrition/${encodeURIComponent(req.params.id)}`;
+    const r = await fetch(url, { headers: fetchHeaders });
+    res.json(await r.json());
+  } catch (err) {
+    console.error("Recipe DB nutrition error:", err);
+    res.status(500).json({ error: "Recipe DB failed" });
+  }
+});
+
+// 🌿 FLAVOR DB PROXY (for frontend flavor pairing / profile calls)
+app.get("/api/flavor/foodpairing/ingredient/:ingredient", async (req, res) => {
+  try {
+    const url = `${FLAVOR_DB_BASE_URL}/foodpairing/ingredient/${encodeURIComponent(req.params.ingredient)}`;
+    const r = await fetch(url, { headers: fetchHeaders });
+    if (!r.ok) throw new Error(`FlavorDB ${r.status}`);
+    res.json(await r.json());
+  } catch (err) {
+    console.error("FlavorDB foodpairing error:", err);
+    res.status(500).json({ error: "FlavorDB failed" });
+  }
+});
+app.get("/api/flavor/molecules/flavor-profile/:profile", async (req, res) => {
+  try {
+    const url = `${FLAVOR_DB_BASE_URL}/molecules/flavor-profile/${encodeURIComponent(req.params.profile)}`;
+    const r = await fetch(url, { headers: fetchHeaders });
+    if (!r.ok) throw new Error(`FlavorDB ${r.status}`);
+    res.json(await r.json());
+  } catch (err) {
+    console.error("FlavorDB profile error:", err);
+    res.status(500).json({ error: "FlavorDB failed" });
+  }
+});
+
 app.get("/", (req, res) => {
   res.send("FlavourAI backend is running 🚀");
 });

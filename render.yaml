@@ -1,0 +1,27 @@
+# Render Blueprint - Deploy the FlavourAI/Recipe API
+# https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: flavourai-api
+    runtime: node
+    region: oregon
+
+    # Backend lives in the backend/ subfolder
+    rootDir: backend
+
+    buildCommand: npm install
+    startCommand: npm start
+
+    # Health check for zero-downtime deploys
+    healthCheckPath: /
+
+    # Free tier - upgrade to starter if you need more reliability
+    plan: free
+
+    # Optional: add GROQ_API_KEY or OPENAI_API_KEY in Render Dashboard for LLM meal fallback
+    envVars:
+      - key: GROQ_API_KEY
+        sync: false  # You'll add this in Render Dashboard
+      - key: NODE_ENV
+        value: production
